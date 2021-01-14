@@ -32,7 +32,7 @@ ls -al /usr/203b-data/mimic-iv/hosp
 ```
 The functionalities of the bash commands `zcat`, `zless`, `zmore`are:
 
-`zcat`: 
+`zcat`: explain is fine
 
 
 4.
