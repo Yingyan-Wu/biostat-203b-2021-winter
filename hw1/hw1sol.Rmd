@@ -1,0 +1,56 @@
+---
+title: "HW1 solution"
+author: "Yingyan Wu 905322944"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Display machine information for reproducibility
+sessionInfo()
+```
+
+## Q2
+1. [CITI report](https://www.citiprogram.org/verify/?k27371356-721f-402b-973e-65f69972d6db-40337499) and [CITI certificate](https://www.citiprogram.org/verify/?w2b70f764-6008-41a7-a876-3eb1d5ec2bb7-40337499).
+
+2.
+```{bash}
+ls -l /usr/203b-data/mimic-iv
+```
+
+3.
+```{bash}
+# Display the contents in the folder core
+ls -al /usr/203b-data/mimic-iv/core
+# Display the contents in the folder hosp
+ls -al /usr/203b-data/mimic-iv/hosp
+# Display the contents in the folder icu
+ls -al /usr/203b-data/mimic-iv/hosp
+```
+The functionalities of the bash commands `zcat`, `zless`, `zmore`are:
+
+`zcat`: 
+
+
+4.
+```{bash}
+for datafile in /usr/203b-data/mimic-iv/core/*.gz
+  do
+    ls -l $datafile
+  done
+```
+
+## Q3.
+
+1. 
+```{bash}
+curl http://www.gutenberg.org/cache/epub/42671/pg42671.txt > pride_and_prejudice.txt
+
+for 
+```
+
+
+
