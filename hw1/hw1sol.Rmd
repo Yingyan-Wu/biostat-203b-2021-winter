@@ -63,7 +63,7 @@ ls -al /usr/203b-data/mimic-iv/hosp
 # Display the contents in the folder icu
 ls -al /usr/203b-data/mimic-iv/hosp
 ```
-
+    
     The functionalities of the bash commands `zcat`, `zless`, `zmore`are:
   
   `zcat`: view contents of a compressed file.
@@ -87,6 +87,8 @@ Display the number of lines in each data file using a similar loop.
     curl http://www.gutenberg.org/cache/epub/42671/pg42671.txt > pride_and_prejudice.txt
     ```
 Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` loop, how would you tabulate the number of times each of the four characters is mentioned?
+=======
+`zcat`: explain is fine
 
 2. What's the difference between the following two commands?
     ```{bash eval=FALSE}
