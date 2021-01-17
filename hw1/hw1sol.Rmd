@@ -35,6 +35,7 @@ sessionInfo()
      **Solution**: Done.
 
 5. After this course, you can make this repository public and use it to demonstrate your skill sets on job market.
+
     **Solution**: Will do.
 
 ## Q2. Linux Shell Commands
@@ -55,19 +56,33 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
 3. Display the contents in the folders `core`, `hosp`, `icu`. What are the functionalities of the bash commands `zcat`, `zless`, `zmore`, and `zgrep`? 
 
     **Solution**:
-```{bash}
-# Display the contents in the folder core
-ls -al /usr/203b-data/mimic-iv/core
-# Display the contents in the folder hosp
-ls -al /usr/203b-data/mimic-iv/hosp
-# Display the contents in the folder icu
-ls -al /usr/203b-data/mimic-iv/hosp
-```
+    ```{bash}
+    # Display the contents in the folder core
+    ls /usr/203b-data/mimic-iv/core
+    ```
+
+    ```{bash}
+    # Display the contents in the folder hosp
+    ls /usr/203b-data/mimic-iv/hosp
+    ```
+
+    ```{bash}
+    # Display the contents in the folder icu
+    ls /usr/203b-data/mimic-iv/hosp
+    ```
+
+
     
     The functionalities of the bash commands `zcat`, `zless`, `zmore`are:
   
-  `zcat`: view contents of a compressed file.
-
+    `zcat`: view contents of a compressed file without really decompressing it.
+  
+    `zless`: view the zipped files with more viewing flexibility (such as scroll upwards and downwards through the input).
+  
+    `zmore`: view zipped files one screen at a time (much like the more command) without first decompressing them.
+   
+    `zgrep`: print lines that match the expression in zipped files without decompressing it.
+    
 
 4. What's the output of following bash script?
     ```{bash, eval=F}
@@ -76,19 +91,90 @@ ls -al /usr/203b-data/mimic-iv/hosp
         ls -l $datafile
       done
     ```
-Display the number of lines in each data file using a similar loop.
 
-4. Display the first few lines of `admissions.csv.gz`. How many rows are in this data file? How many unique patients (identified by `subject_id`) are in this data file? What are the possible values taken by each of the variable `admission_type`, `admission_location`, `insurance`, `language`, `marital_status`, and `ethnicity`? Also report the count for each unique value of these variables. (Hint: combine Linux commands `zcat`, `head`/`tail`, `awk`, `uniq`, `wc`, and so on.)
+    **Solution**:
+    The output is a list of detailed contents of every zipped file in the core folder.
+
+    Display the number of lines in each data file using a similar loop.
+
+    **Solution**:
+    ```{bash}
+    for datafile in /usr/203b-data/mimic-iv/core/*.gz
+      do
+        wc -l $datafile
+      done
+    ```
+
+
+5. Display the first few lines of `admissions.csv.gz`. How many rows are in this data file? How many unique patients (identified by `subject_id`) are in this data file? What are the possible values taken by each of the variable `admission_type`, `admission_location`, `insurance`, `language`, `marital_status`, and `ethnicity`? Also report the count for each unique value of these variables. (Hint: combine Linux commands `zcat`, `head`/`tail`, `awk`, `uniq`, `wc`, and so on.)
+
+    ```{bash}
+    # display the first few lines of 'admissions.csv.gz'
+    zless /usr/203b-data/mimic-iv/core/admissions.csv.gz|head
+    ```
+    ```{bash}
+    #rows in this datafile
+    wc -l /usr/203b-data/mimic-iv/core/admissions.csv.gz
+    ```
+    There are 65080 rows in the data file.
+    
+    ```{bash}
+  #How many unique patients (identified by `subject_id`) are in this data file?
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $1}'|
+     sort -u|wc -l
+  # another attempt to this question 
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $1}'|
+     sort|uniq|wc -l
+    ```
+    257367 unique patients are in this data file.
+    
+    ```{bash}
+# What are the possible values taken by each of the variable:
+## `admission_type`
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $6}'|
+      sort -u
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $6}'|
+      sort -u|wc -l
+##  `admission_location`
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $7}'|
+      sort -u
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $7}'|
+      sort -u|wc -l
+##  `insurance`
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $9}'|
+      sort -u
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $9}'|
+      sort -u|wc -l
+##  `language`
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $10}'|
+      sort -u
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $10}'|
+      sort -u|wc -l
+##  `marital_status`
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $11}'|
+      sort -u
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $11}'|
+      sort -u|wc -l
+## `ethnicity`
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $12}'|
+      sort -u
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $12}'|
+      sort -u|wc -l
+  
+    ```
+
 
 ## Q3. Who's popular in Price and Prejudice
 
 1. You and your friend just have finished reading *Pride and Prejudice* by Jane Austen. Among the four main characters in the book, Elizabeth, Jane, Lydia, and Darcy, your friend thinks that Darcy was the most mentioned. You, however, are certain it was Elizabeth. Obtain the full text of the novel from <http://www.gutenberg.org/cache/epub/42671/pg42671.txt> and save to your local folder. 
+
     ```{bash, eval=FALSE}
     curl http://www.gutenberg.org/cache/epub/42671/pg42671.txt > pride_and_prejudice.txt
     ```
-Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` loop, how would you tabulate the number of times each of the four characters is mentioned?
-=======
-`zcat`: explain is fine
+
+    Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` loop, how would you tabulate the number of times each of the four characters is mentioned?
+
+    `zcat`: explain is fine
 
 2. What's the difference between the following two commands?
     ```{bash eval=FALSE}
