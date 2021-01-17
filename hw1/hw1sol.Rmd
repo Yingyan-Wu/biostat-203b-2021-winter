@@ -173,8 +173,17 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
     ```
 
     Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` loop, how would you tabulate the number of times each of the four characters is mentioned?
+    
+    
 
-    `zcat`: explain is fine
+    ```{bash}
+    MAIN_CHARACTERS=('Elizabeth' 'Jane' 'Lydia' 'Darcy')
+    
+    for text in "${MAIN_CHARACTERS[@]}"
+      do
+       grep  $text pride_and_prejudice.txt|wc -l|awk -F
+      done
+    ```
 
 2. What's the difference between the following two commands?
     ```{bash eval=FALSE}
@@ -185,6 +194,9 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
     echo 'hello, world' >> test2.txt
     ```
 
+    **Solution**:
+    The first command use `>` directs output from one command to a file while the second command use `>>` apppends output from one command to a file. For example, if the command is `echo 'hello,world'|wc -l`, the contents of text1.txt would be just "1" while the contents of text2.txt would be "hello, world" and "1" in two lines.
+    
 3. Using your favorite text editor (e.g., `vi`), type the following and save the file as `middle.sh`:
     ```{bash eval=FALSE}
     #!/bin/sh
@@ -197,6 +209,9 @@ Using `chmod` make the file executable by the owner, and run
     ./middle.sh pride_and_prejudice.txt 20 5
     ```
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
+
+**Solution**:
+
 
 ### Q4. More fun with Linux
 
