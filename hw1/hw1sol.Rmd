@@ -174,16 +174,20 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
 
     Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` loop, how would you tabulate the number of times each of the four characters is mentioned?
     
-    
+    **Solution**:
 
     ```{bash}
     MAIN_CHARACTERS=('Elizabeth' 'Jane' 'Lydia' 'Darcy')
     
     for text in "${MAIN_CHARACTERS[@]}"
       do
-       grep  $text pride_and_prejudice.txt|wc -l|awk -F
+       # pull the only match word to a single line ignoring cases
+       grep -o -i $text pride_and_prejudice.txt|wc -l
       done
-    ```
+```
+    
+
+
 
 2. What's the difference between the following two commands?
     ```{bash eval=FALSE}
