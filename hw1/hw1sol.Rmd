@@ -215,7 +215,7 @@ Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this sh
 
 **Solution**:
     ```{bash}
-    vi  #!/bin/sh
+   # vi  #!/bin/sh
     ```
 
 ### Q4. More fun with Linux
