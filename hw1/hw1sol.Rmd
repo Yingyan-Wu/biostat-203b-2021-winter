@@ -52,6 +52,7 @@ sessionInfo()
 Please, do **not** put these data files into Git; they are big. Do **not** copy them into your directory. Do **not** decompress the gz data files. These create unnecessary big files on storage and are not big data friendly practices. Just read from the data folder `/usr/203b-data/mimic-iv` directly in following exercises. 
 
     Use Bash commands to answer following questions.
+    
     **Solution**: Will do!
 
 3. Display the contents in the folders `core`, `hosp`, `icu`. What are the functionalities of the bash commands `zcat`, `zless`, `zmore`, and `zgrep`? 
@@ -110,7 +111,7 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
     **Solution**:
     ```{bash}
     # display the first few lines of 'admissions.csv.gz'
-    zless /usr/203b-data/mimic-iv/core/admissions.csv.gz|head
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|head
     ```
     ```{bash}
     #rows in this datafile
@@ -128,7 +129,7 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
     ```
     257367 unique patients are in this data file.
     
-```{bash}
+    ```{bash}
 # What are the possible values taken by each of the variable:
 ## `admission_type`
     zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $6}'|
@@ -139,27 +140,27 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
 ##  `admission_location`
     zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $7}'|
       sort|uniq -c
-```
+    ```
 
-```{bash}      
+    ```{bash}      
 ##  `insurance`
     zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $9}'|
       sort|uniq -c
-```
+    ```
 
-```{bash} 
+    ```{bash} 
 ##  `language`
     zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $10}'|
       sort|uniq -c
-```
+    ```
 
-```{bash} 
+    ```{bash} 
 ##  `marital_status`
     zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $11}'|
       sort|uniq -c
-```
+    ```
 
-```{bash} 
+    ```{bash} 
 ## `ethnicity`
     zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $12}'|
       sort|uniq -c
@@ -221,7 +222,7 @@ Used `vi` to edit the `middle.sh` file and `chmod +x` make this file executable.
    chmod +x middle.sh
   ./middle.sh pride_and_prejudice.txt 20 5
     ```
-Use the script from `middle.sh` to obtain the last five line of the first 20 lines from the text file.
+Use the script from `middle.sh` to obtain the last five line of the first 20 lines from the text file. PENDING!
 ```{bash}
 
 ```
