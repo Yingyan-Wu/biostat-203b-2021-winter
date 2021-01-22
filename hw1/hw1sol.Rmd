@@ -73,7 +73,7 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
     ls /usr/203b-data/mimic-iv/hosp
     ```
 
-    The functionalities of the bash commands `zcat`, `zless`, `zmore`are:
+    The functionalities of the bash commands `zcat`, `zless`, `zmore`and `zgrep`are:
   
     `zcat`: view contents of a compressed file without really decompressing it.
   
@@ -123,24 +123,23 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
   #How many unique patients (identified by `subject_id`) are in this data file?
     zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $1}'|
      sort -u|wc -l
-  # another attempt to this question 
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $1}'|
-     sort|uniq|wc -l
     ```
-    257367 unique patients are in this data file.
+    257366 unique patients are in this data file.
     
     ```{bash}
 # What are the possible values taken by each of the variable:
 ## `admission_type`
     zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $6}'|
       sort|uniq -c
-```
+    ```
       
-```{bash}
+      
+    ```{bash}
 ##  `admission_location`
     zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $7}'|
       sort|uniq -c
     ```
+
 
     ```{bash}      
 ##  `insurance`
@@ -148,17 +147,20 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
       sort|uniq -c
     ```
 
+
     ```{bash} 
 ##  `language`
     zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $10}'|
       sort|uniq -c
     ```
 
+
     ```{bash} 
 ##  `marital_status`
     zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $11}'|
       sort|uniq -c
     ```
+
 
     ```{bash} 
 ## `ethnicity`
@@ -190,6 +192,7 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
       done
 ```
 
+The name Elizabeth is mentioned 634 times in the text, 294 times for the name Jane, 171 times for the name Lydia and 418 times for the name Darcy.
 
 2. What's the difference between the following two commands?
     ```{bash eval=FALSE}
@@ -216,17 +219,18 @@ Using `chmod` make the file executable by the owner, and run
     ```
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
 
-**Solution**:
-Used `vi` to edit the `middle.sh` file and `chmod +x` make this file executable. 
-    ```{bash}
-   chmod +x middle.sh
-  ./middle.sh pride_and_prejudice.txt 20 5
-    ```
-Use the script from `middle.sh` to obtain the last five line of the first 20 lines from the text file. PENDING!
-```{bash}
+    **Solution**:
+    Used `vi` to edit the `middle.sh` file and `chmod +x` make this file executable. 
 
-```
-We need the first line of the shell script because `#!/bin/sh` is hashbang instructing the program to excute the file using bash shell.
+    ```{bash}
+     chmod +x middle.sh
+     ./middle.sh pride_and_prejudice.txt 20 5
+    ```
+
+
+    Use the script from `middle.sh` to obtain the line 16-20 from the text file. `"$2"`, `"$1"` and `"$3"` refers to the second, first and third arguments, respectively. After fill in the argument, the command is actually doing `head -20 pride_and_prejudice.txt|tail -5`.
+
+    We need the first line of the shell script because `#!/bin/sh` is hashbang instructing the program to excute the file using bash shell.
 
 ### Q4. More fun with Linux
 
