@@ -100,7 +100,7 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
     ```{bash}
     for datafile in /usr/203b-data/mimic-iv/core/*.gz
       do
-        wc -l $datafile
+        zcat $datafile | wc -l
       done
     ```
 
@@ -114,54 +114,58 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
     ```
     ```{bash}
     #rows in this datafile
-    wc -l /usr/203b-data/mimic-iv/core/admissions.csv.gz
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|wc -l
     ```
-    There are 65080 rows in the data file.
+    There are 524521 rows in the data file.
     
     ```{bash}
   #How many unique patients (identified by `subject_id`) are in this data file?
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $1}'|
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $1}'|
      sort -u|wc -l
   # another attempt to this question 
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $1}'|
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $1}'|
      sort|uniq|wc -l
     ```
     257367 unique patients are in this data file.
     
-    ```{bash}
+```{bash}
 # What are the possible values taken by each of the variable:
 ## `admission_type`
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $6}'|
-      sort -u
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $6}'|
-      sort -u|wc -l
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $6}'|
+      sort|uniq -c
+```
+      
+```{bash}
 ##  `admission_location`
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $7}'|
-      sort -u
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $7}'|
-      sort -u|wc -l
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $7}'|
+      sort|uniq -c
+```
+
+```{bash}      
 ##  `insurance`
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $9}'|
-      sort -u
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $9}'|
-      sort -u|wc -l
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $9}'|
+      sort|uniq -c
+```
+
+```{bash} 
 ##  `language`
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $10}'|
-      sort -u
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $10}'|
-      sort -u|wc -l
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $10}'|
+      sort|uniq -c
+```
+
+```{bash} 
 ##  `marital_status`
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $11}'|
-      sort -u
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $11}'|
-      sort -u|wc -l
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $11}'|
+      sort|uniq -c
+```
+
+```{bash} 
 ## `ethnicity`
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $12}'|
-      sort -u
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, '{print $12}'|
-      sort -u|wc -l
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $12}'|
+      sort|uniq -c
   
     ```
+
 
 ## Q3. Who's popular in Price and Prejudice
 
@@ -184,8 +188,6 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
        grep -o -i $text pride_and_prejudice.txt|wc -l
       done
 ```
-    
-
 
 
 2. What's the difference between the following two commands?
@@ -198,7 +200,7 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
     ```
 
     **Solution**:
-    The first command use `>` directs output from one command to a file while the second command use `>>` apppends output from one command to a file. For example, if the command is `echo 'hello,world'|wc -l`, the contents of text1.txt would be just "1" while the contents of text2.txt would be "hello, world" and "1" in two lines.
+    The first command use `>` directs output from one command to a file while the second command use `>>` apppends output from one command to a file. For example, if the command is `echo 'hello,world'|wc -l`, the contents of text1.txt would be just "1" while the contents of text2.txt would be "hello, world" and "1" in two lines. Also, if you run these commands multiple times, text1.txt would only show one line (show result once) while text2.txt would show several lines (show results multiple times).
     
 3. Using your favorite text editor (e.g., `vi`), type the following and save the file as `middle.sh`:
     ```{bash eval=FALSE}
@@ -214,9 +216,16 @@ Using `chmod` make the file executable by the owner, and run
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
 
 **Solution**:
+Used `vi` to edit the `middle.sh` file and `chmod +x` make this file executable. 
     ```{bash}
-   # vi  #!/bin/sh
+   chmod +x middle.sh
+  ./middle.sh pride_and_prejudice.txt 20 5
     ```
+Use the script from `middle.sh` to obtain the last five line of the first 20 lines from the text file.
+```{bash}
+
+```
+We need the first line of the shell script because `#!/bin/sh` is hashbang instructing the program to excute the file using bash shell.
 
 ### Q4. More fun with Linux
 
@@ -293,13 +302,14 @@ last | head
 echo {con,pre}{sent,fer}{s,ed}
 ```
 
-`time sleep 5`
+`time sleep 5`: displays how long it will take to run the command sleep 5 by a system, user and real time. sleep 5 command is used to delay for 5 seconds.
 ```{bash}
 time sleep 5
 ```
 
 `history | tail`: displays the last 10 commands that executed previously.
 ```{bash}
+set -o history
 history | tail
 ```
 
