@@ -121,51 +121,51 @@ Please, do **not** put these data files into Git; they are big. Do **not** copy 
     
     ```{bash}
   #How many unique patients (identified by `subject_id`) are in this data file?
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $1}'|
-     sort -u|wc -l
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz| \
+    awk -F, 'FNR > 1 {print $1}'|sort -u|wc -l
     ```
     257366 unique patients are in this data file.
     
     ```{bash}
 # What are the possible values taken by each of the variable:
 ## `admission_type`
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $6}'|
-      sort|uniq -c
+zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz| \
+awk -F, 'FNR > 1 {print $6}'|sort|uniq -c
     ```
       
       
     ```{bash}
 ##  `admission_location`
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $7}'|
-      sort|uniq -c
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz| \
+    awk -F, 'FNR > 1 {print $7}'|sort|uniq -c
     ```
 
 
     ```{bash}      
 ##  `insurance`
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $9}'|
-      sort|uniq -c
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz| \
+    awk -F, 'FNR > 1 {print $9}'|sort|uniq -c
     ```
 
 
     ```{bash} 
 ##  `language`
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $10}'|
-      sort|uniq -c
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz| \
+    awk -F, 'FNR > 1 {print $10}'|sort|uniq -c
     ```
 
 
     ```{bash} 
 ##  `marital_status`
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $11}'|
-      sort|uniq -c
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz| \
+    awk -F, 'FNR > 1 {print $11}'|sort|uniq -c
     ```
 
 
     ```{bash} 
 ## `ethnicity`
-    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $12}'|
-      sort|uniq -c
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz| \
+    awk -F, 'FNR > 1 {print $12}'|sort|uniq -c
   
     ```
 

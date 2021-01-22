@@ -520,14 +520,14 @@ zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|wc -l</code></pre>
 <pre><code>## 524521</code></pre>
 <p>There are 524521 rows in the data file.</p>
 <pre class="bash"><code>  #How many unique patients (identified by `subject_id`) are in this data file?
-zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, &#39;FNR &gt; 1 {print $1}&#39;|
- sort -u|wc -l</code></pre>
+zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz| \
+awk -F, &#39;FNR &gt; 1 {print $1}&#39;|sort -u|wc -l</code></pre>
 <pre><code>## 257366</code></pre>
 <p>257366 unique patients are in this data file.</p>
 <pre class="bash"><code># What are the possible values taken by each of the variable:
 ## `admission_type`
-zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, &#39;FNR &gt; 1 {print $6}&#39;|
-  sort|uniq -c</code></pre>
+zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz| \
+awk -F, &#39;FNR &gt; 1 {print $6}&#39;|sort|uniq -c</code></pre>
 <pre><code>##    7259 AMBULATORY OBSERVATION
 ##   21595 DIRECT EMER.
 ##   20014 DIRECT OBSERVATION
@@ -538,8 +538,8 @@ zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, &#39;FNR &gt; 1 {pri
 ##   41103 SURGICAL SAME DAY ADMISSION
 ##   47970 URGENT</code></pre>
 <pre class="bash"><code>##  `admission_location`
-zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, &#39;FNR &gt; 1 {print $7}&#39;|
-  sort|uniq -c</code></pre>
+zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz| \
+awk -F, &#39;FNR &gt; 1 {print $7}&#39;|sort|uniq -c</code></pre>
 <pre><code>##   60437 
 ##     191 AMBULATORY SURGERY TRANSFER
 ##   10678 CLINIC REFERRAL
@@ -553,27 +553,27 @@ zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, &#39;FNR &gt; 1 {pri
 ##    4069 TRANSFER FROM SKILLED NURSING FACILITY
 ##   16715 WALK-IN/SELF REFERRAL</code></pre>
 <pre class="bash"><code>##  `insurance`
-zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, &#39;FNR &gt; 1 {print $9}&#39;|
-  sort|uniq -c</code></pre>
+zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz| \
+awk -F, &#39;FNR &gt; 1 {print $9}&#39;|sort|uniq -c</code></pre>
 <pre><code>##   50962 Medicaid
 ##  171492 Medicare
 ##  302066 Other</code></pre>
 <pre class="bash"><code>##  `language`
-zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, &#39;FNR &gt; 1 {print $10}&#39;|
-  sort|uniq -c</code></pre>
+zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz| \
+awk -F, &#39;FNR &gt; 1 {print $10}&#39;|sort|uniq -c</code></pre>
 <pre><code>##   46231 ?
 ##  478289 ENGLISH</code></pre>
 <pre class="bash"><code>##  `marital_status`
-zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, &#39;FNR &gt; 1 {print $11}&#39;|
-  sort|uniq -c</code></pre>
+zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz| \
+awk -F, &#39;FNR &gt; 1 {print $11}&#39;|sort|uniq -c</code></pre>
 <pre><code>##   66133 
 ##   33762 DIVORCED
 ##  195326 MARRIED
 ##  180453 SINGLE
 ##   48846 WIDOWED</code></pre>
 <pre class="bash"><code>## `ethnicity`
-zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, &#39;FNR &gt; 1 {print $12}&#39;|
-  sort|uniq -c
+zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz| \
+awk -F, &#39;FNR &gt; 1 {print $12}&#39;|sort|uniq -c
 </code></pre>
 <pre><code>##    1536 AMERICAN INDIAN/ALASKA NATIVE
 ##   24522 ASIAN
@@ -688,7 +688,7 @@ head -n &quot;$2&quot; &quot;$1&quot; | tail -n &quot;$3&quot;</code></pre>
 ## 24 25 26 27 28 29 30</code></pre>
 <p><code>date</code>: displays the current date and time in UTC time zone.</p>
 <pre class="bash"><code>date</code></pre>
-<pre><code>## Fri Jan 22 18:06:37 UTC 2021</code></pre>
+<pre><code>## Fri Jan 22 18:14:58 UTC 2021</code></pre>
 <p><code>hostname</code>: displays the machine’s host name.</p>
 <pre class="bash"><code>hostname</code></pre>
 <pre><code>## ucla-biostat-203b</code></pre>
@@ -700,7 +700,7 @@ head -n &quot;$2&quot; &quot;$1&quot; | tail -n &quot;$3&quot;</code></pre>
 <pre><code>## Linux ucla-biostat-203b 3.10.0-1160.6.1.el7.x86_64 #1 SMP Tue Nov 17 13:59:11 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux</code></pre>
 <p><code>uptime</code>: displays how long the system is active. It returns the current time, the amount of time system is in running state, number of users currently logged into, the load time for past 1,5,15 minutes respectively.</p>
 <pre class="bash"><code>uptime</code></pre>
-<pre><code>##  18:06:37 up 18 days, 20:17,  3 users,  load average: 1.11, 0.65, 0.44</code></pre>
+<pre><code>##  18:14:58 up 18 days, 20:25,  3 users,  load average: 0.49, 0.53, 0.48</code></pre>
 <p><code>who am i</code>: display the username of the current user when this command is invoked.</p>
 <pre class="bash"><code>whoami</code></pre>
 <pre><code>## yingyanwu</code></pre>
@@ -711,11 +711,11 @@ head -n &quot;$2&quot; &quot;$1&quot; | tail -n &quot;$3&quot;</code></pre>
 ## angelicaruiz pts/8        2021-01-22 17:54 (cpe-108-185-43-213.socal.res.rr.com)</code></pre>
 <p><code>w</code>: displays information about currently logged in users. The first line provides the same information as the <code>uptime</code> command with the information of current time, the amount of time system is in running state, number of users currently logged into, the load time for past 1,5,15 minutes respectively. The list contains the name of logged user, the name of the terminal used by the user, the host name or IP address from where the user is logged in, the time when the user logged in, the time since the user last interacted with terminal. idle time, the time used by all processes attached to the tty, the time used by the user’s current process, the user’s current process and options.</p>
 <pre class="bash"><code>w</code></pre>
-<pre><code>##  18:06:37 up 18 days, 20:17,  3 users,  load average: 1.11, 0.65, 0.44
+<pre><code>##  18:14:58 up 18 days, 20:25,  3 users,  load average: 0.49, 0.53, 0.48
 ## USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
-## zhaofan1 pts/1    cpe-76-91-16-146 17:05    1:57   0.13s  0.13s -bash
-## filipovi pts/7    110.3.236.35.bc. Thu06   35:57m  0.06s  0.06s -bash
-## angelica pts/8    cpe-108-185-43-2 17:54   29.00s  0.02s  0.02s -bash</code></pre>
+## zhaofan1 pts/1    cpe-76-91-16-146 17:05    3:22   0.16s  0.16s -bash
+## filipovi pts/7    110.3.236.35.bc. Thu06   36:05m  0.06s  0.06s -bash
+## angelica pts/8    cpe-108-185-43-2 17:54    1:14   0.04s  0.04s -bash</code></pre>
 <p><code>id</code>: displays the numeric ID’s (UID, gid) of the current user.</p>
 <pre class="bash"><code>id</code></pre>
 <pre><code>## uid=1036(yingyanwu) gid=1038(yingyanwu) groups=1038(yingyanwu) context=system_u:system_r:initrc_t:s0</code></pre>
@@ -739,7 +739,7 @@ head -n &quot;$2&quot; &quot;$1&quot; | tail -n &quot;$3&quot;</code></pre>
 <pre><code>## 
 ## real 0m5.002s
 ## user 0m0.002s
-## sys  0m0.000s</code></pre>
+## sys  0m0.001s</code></pre>
 <p><code>history | tail</code>: displays the last 10 commands that executed previously.</p>
 <pre class="bash"><code>set -o history
 history | tail</code></pre>
