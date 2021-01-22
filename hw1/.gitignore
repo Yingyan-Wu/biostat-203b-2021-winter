@@ -1,0 +1,10 @@
+# ignore pride_and_prejudice txt file
+pride_and_prejudice.txt
+
+# ignore the middle.sh file
+middle.sh
+
+# ignore the test1 and test2
+test1.txt
+test2.txt
+
