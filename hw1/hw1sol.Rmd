@@ -1,6 +1,7 @@
 ---
-title: "HW1 solution"
-author: "Yingyan Wu 905322944"
+title: "Biostat 203B Homework 1 Solution"
+author: Yingyan Wu
+subtitle: Due Jan 22 @ 11:59PM
 output: html_document
 ---
 
@@ -8,49 +9,313 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
-# Display machine information for reproducibility
+Display machine information for reproducibility:
+```{r, eval=T}
 sessionInfo()
 ```
 
-## Q2
-1. [CITI report](https://www.citiprogram.org/verify/?k27371356-721f-402b-973e-65f69972d6db-40337499) and [CITI certificate](https://www.citiprogram.org/verify/?w2b70f764-6008-41a7-a876-3eb1d5ec2bb7-40337499).
+## Q1. Git/GitHub
 
-2.
-```{bash}
-ls -l /usr/203b-data/mimic-iv
+**No handwritten homework reports are accepted for this course.** We work with Git and GitHub. Efficient and abundant use of Git, e.g., frequent and well-documented commits, is an important criterion for grading your homework.
+
+1. Apply for the [Student Developer Pack](https://education.github.com/pack) at GitHub using your UCLA email.
+
+    **Solution**: Done.
+
+2. Create a **private** repository `biostat-203b-2021-winter` and add `Hua-Zhou`, `Chris-German` and `ElvisCuiHan` as your collaborators with write permission.
+
+    **Solution**: Done.
+
+3. Top directories of the repository should be `hw1`, `hw2`, ... Maintain two branches `master` and `develop`. The `develop` branch will be your main playground, the place where you develop solution (code) to homework problems and write up report. The `master` branch will be your presentation area. Submit your homework files (R markdown file `Rmd`, `html` file converted from R markdown, all code and data sets to reproduce results) in `master` branch.
+
+     **Solution**: Done.
+
+4. After each homework due date, teaching assistant and instructor will check out your master branch for grading. Tag each of your homework submissions with tag names `hw1`, `hw2`, ... Tagging time will be used as your submission time. That means if you tag your `hw1` submission after deadline, penalty points will be deducted for late submission.
+
+     **Solution**: Done.
+
+5. After this course, you can make this repository public and use it to demonstrate your skill sets on job market.
+
+    **Solution**: Will do.
+
+## Q2. Linux Shell Commands
+
+1. This exercise (and later in this course) uses the [MIMIC-IV data](https://mimic-iv.mit.edu), a freely accessible critical care database developed by the MIT Lab for Computational Physiology. Follow the instructions at <https://mimic-iv.mit.edu/docs/access/> to (1) complete the CITI `Data or Specimens Only Research` course and (2) obtain the PhysioNet credential for using the MIMIC-IV data. Display the verification links to your completion report and completion certificate here. (Hint: The CITI training takes a couple hours and the PhysioNet credentialing takes a couple days; do not leave it to the last minute.)
+
+    **Solution**: Here's the verification links:
+    [CITI report](https://www.citiprogram.org/verify/?k27371356-721f-402b-973e-65f69972d6db-40337499) and [CITI certificate](https://www.citiprogram.org/verify/?w2b70f764-6008-41a7-a876-3eb1d5ec2bb7-40337499).
+
+2. The `/usr/203b-data/mimic-iv/` folder on teaching server contains data sets from MIMIC-IV. Refer to <https://mimic-iv.mit.edu/docs/datasets/> for details of data files.  
+    ```{bash}
+    ls -l /usr/203b-data/mimic-iv
+    ```
+Please, do **not** put these data files into Git; they are big. Do **not** copy them into your directory. Do **not** decompress the gz data files. These create unnecessary big files on storage and are not big data friendly practices. Just read from the data folder `/usr/203b-data/mimic-iv` directly in following exercises. 
+
+    Use Bash commands to answer following questions.
+    
+    **Solution**: Will do!
+
+3. Display the contents in the folders `core`, `hosp`, `icu`. What are the functionalities of the bash commands `zcat`, `zless`, `zmore`, and `zgrep`? 
+
+    **Solution**:
+    ```{bash}
+    # Display the contents in the folder core
+    ls /usr/203b-data/mimic-iv/core
+    ```
+
+    ```{bash}
+    # Display the contents in the folder hosp
+    ls /usr/203b-data/mimic-iv/hosp
+    ```
+
+    ```{bash}
+    # Display the contents in the folder icu
+    ls /usr/203b-data/mimic-iv/hosp
+    ```
+
+    The functionalities of the bash commands `zcat`, `zless`, `zmore`and `zgrep`are:
+  
+    `zcat`: view contents of a compressed file without really decompressing it.
+  
+    `zless`: view the zipped files with more viewing flexibility (such as scroll upwards and downwards through the input).
+  
+    `zmore`: view zipped files one screen at a time (much like the more command) without first decompressing them.
+   
+    `zgrep`: print lines that match the expression in zipped files without decompressing it.
+    
+
+4. What's the output of following bash script?
+    ```{bash, eval=F}
+    for datafile in /usr/203b-data/mimic-iv/core/*.gz
+      do
+        ls -l $datafile
+      done
+    ```
+
+    **Solution**:
+    The output is a list of detailed contents of every zipped file in the core folder.
+
+    Display the number of lines in each data file using a similar loop.
+
+    **Solution**:
+    ```{bash}
+    for datafile in /usr/203b-data/mimic-iv/core/*.gz
+      do
+        zcat $datafile | wc -l
+      done
+    ```
+
+
+5. Display the first few lines of `admissions.csv.gz`. How many rows are in this data file? How many unique patients (identified by `subject_id`) are in this data file? What are the possible values taken by each of the variable `admission_type`, `admission_location`, `insurance`, `language`, `marital_status`, and `ethnicity`? Also report the count for each unique value of these variables. (Hint: combine Linux commands `zcat`, `head`/`tail`, `awk`, `uniq`, `wc`, and so on.)
+
+    **Solution**:
+    ```{bash}
+    # display the first few lines of 'admissions.csv.gz'
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|head
+    ```
+    ```{bash}
+    #rows in this datafile
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|wc -l
+    ```
+    There are 524521 rows in the data file.
+    
+    ```{bash}
+  #How many unique patients (identified by `subject_id`) are in this data file?
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $1}'|
+     sort -u|wc -l
+    ```
+    257366 unique patients are in this data file.
+    
+    ```{bash}
+# What are the possible values taken by each of the variable:
+## `admission_type`
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $6}'|
+      sort|uniq -c
+    ```
+      
+      
+    ```{bash}
+##  `admission_location`
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $7}'|
+      sort|uniq -c
+    ```
+
+
+    ```{bash}      
+##  `insurance`
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $9}'|
+      sort|uniq -c
+    ```
+
+
+    ```{bash} 
+##  `language`
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $10}'|
+      sort|uniq -c
+    ```
+
+
+    ```{bash} 
+##  `marital_status`
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $11}'|
+      sort|uniq -c
+    ```
+
+
+    ```{bash} 
+## `ethnicity`
+    zcat /usr/203b-data/mimic-iv/core/admissions.csv.gz|awk -F, 'FNR > 1 {print $12}'|
+      sort|uniq -c
+  
+    ```
+
+
+## Q3. Who's popular in Price and Prejudice
+
+1. You and your friend just have finished reading *Pride and Prejudice* by Jane Austen. Among the four main characters in the book, Elizabeth, Jane, Lydia, and Darcy, your friend thinks that Darcy was the most mentioned. You, however, are certain it was Elizabeth. Obtain the full text of the novel from <http://www.gutenberg.org/cache/epub/42671/pg42671.txt> and save to your local folder. 
+
+    ```{bash, eval=FALSE}
+    curl http://www.gutenberg.org/cache/epub/42671/pg42671.txt > pride_and_prejudice.txt
+    ```
+
+    Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` loop, how would you tabulate the number of times each of the four characters is mentioned?
+    
+    **Solution**:
+
+    ```{bash}
+    MAIN_CHARACTERS=('Elizabeth' 'Jane' 'Lydia' 'Darcy')
+    
+    for text in "${MAIN_CHARACTERS[@]}"
+      do
+       # pull the only match word to a single line ignoring cases
+       grep -o -i $text pride_and_prejudice.txt|wc -l
+      done
 ```
 
-3.
+The name Elizabeth is mentioned 634 times in the text, 294 times for the name Jane, 171 times for the name Lydia and 418 times for the name Darcy.
+
+2. What's the difference between the following two commands?
+    ```{bash eval=FALSE}
+    echo 'hello, world' > test1.txt
+    ```
+    and
+    ```{bash eval=FALSE}
+    echo 'hello, world' >> test2.txt
+    ```
+
+    **Solution**:
+    The first command use `>` directs output from one command to a file while the second command use `>>` apppends output from one command to a file. For example, if the command is `echo 'hello,world'|wc -l`, the contents of text1.txt would be just "1" while the contents of text2.txt would be "hello, world" and "1" in two lines. Also, if you run these commands multiple times, text1.txt would only show one line (show result once) while text2.txt would show several lines (show results multiple times).
+    
+3. Using your favorite text editor (e.g., `vi`), type the following and save the file as `middle.sh`:
+    ```{bash eval=FALSE}
+    #!/bin/sh
+    # Select lines from the middle of a file.
+    # Usage: bash middle.sh filename end_line num_lines
+    head -n "$2" "$1" | tail -n "$3"
+    ```
+Using `chmod` make the file executable by the owner, and run 
+    ```{bash eval=FALSE}
+    ./middle.sh pride_and_prejudice.txt 20 5
+    ```
+Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
+
+    **Solution**:
+    Used `vi` to edit the `middle.sh` file and `chmod +x` make this file executable. 
+
+    ```{bash}
+     chmod +x middle.sh
+     ./middle.sh pride_and_prejudice.txt 20 5
+    ```
+
+
+    Use the script from `middle.sh` to obtain the line 16-20 from the text file. `"$2"`, `"$1"` and `"$3"` refers to the second, first and third arguments, respectively. After fill in the argument, the command is actually doing `head -20 pride_and_prejudice.txt|tail -5`.
+
+    We need the first line of the shell script because `#!/bin/sh` is hashbang instructing the program to excute the file using bash shell.
+
+### Q4. More fun with Linux
+
+Try these commands in Bash and interpret the results: `cal`, `cal 2021`, `cal 9 1752` (anything unusual?), `date`, `hostname`, `arch`, `uname -a`, `uptime`, `who am i`, `who`, `w`, `id`, `last | head`, `echo {con,pre}{sent,fer}{s,ed}`, `time sleep 5`, `history | tail`.
+
+**Solution**:
+`cal`: displays the calendar of current month. 
 ```{bash}
-# Display the contents in the folder core
-ls -al /usr/203b-data/mimic-iv/core
-# Display the contents in the folder hosp
-ls -al /usr/203b-data/mimic-iv/hosp
-# Display the contents in the folder icu
-ls -al /usr/203b-data/mimic-iv/hosp
+cal
 ```
-The functionalities of the bash commands `zcat`, `zless`, `zmore`are:
 
-`zcat`: explain is fine
-
-
-4.
+`cal 2021`: displays the calendar of current year.
 ```{bash}
-for datafile in /usr/203b-data/mimic-iv/core/*.gz
-  do
-    ls -l $datafile
-  done
+cal 2021
 ```
 
-## Q3.
-
-1. 
+`cal 9 1752': displays the month calendar of September 1752.
 ```{bash}
-curl http://www.gutenberg.org/cache/epub/42671/pg42671.txt > pride_and_prejudice.txt
-
-for 
+cal 9 1752
 ```
 
+`date`: displays the current date and time in UTC time zone.
+```{bash}
+date
+```
+
+`hostname`: displays the machine's host name.
+```{bash}
+hostname
+```
+
+`arch`: displays the architecture of this machine.
+```{bash}
+arch
+```
+
+`uname -a`: displays all available information about the operating system name and system hardware.
+```{bash}
+uname -a
+```
+
+`uptime`: displays how long the system is active. It returns the current time, the amount of time system is in running state, number of users currently logged into, the load time for past 1,5,15 minutes respectively.
+```{bash}
+uptime
+```
+
+`who am i`: display the username of the current user when this command is invoked.
+```{bash}
+whoami
+```
+
+`who`: displays the list of all users that are currently logged on the system with the information: the name of the logged user, this user's terminal, the time when the user logged in, the hostname or IP address from where the user is logged in.
+```{bash}
+who
+```
+
+`w`: displays information about currently logged in users. The first line provides the same information as the `uptime` command with the information of current time, the amount of time system is in running state, number of users currently logged into, the load time for past 1,5,15 minutes respectively. The list contains the name of logged user, the name of the terminal used by the user, the host name or IP address from where the user is logged in, the time when the user logged in, the time since the user last interacted with terminal. idle time, the time used by all processes attached to the tty, the time used by the user's current process, the user's current process and options.
+```{bash}
+w
+```
+
+`id`: displays the numeric ID's (UID, gid) of the current user.
+```{bash}
+id
+```
+
+`last | head`: displays the first 10 lines of the list of all the users logged in.
+```{bash}
+last | head
+```
+
+`echo {con,pre}{sent,fer}{s,ed}`: displays the concatenate 3 fields into one word 
+```{bash}
+echo {con,pre}{sent,fer}{s,ed}
+```
+
+`time sleep 5`: displays how long it will take to run the command sleep 5 by a system, user and real time. sleep 5 command is used to delay for 5 seconds.
+```{bash}
+time sleep 5
+```
+
+`history | tail`: displays the last 10 commands that executed previously.
+```{bash}
+set -o history
+history | tail
+```
 
 
