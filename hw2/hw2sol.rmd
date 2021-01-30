@@ -1,5 +1,6 @@
 ---
 title: "Biostat 203B Homework 2"
+author: Yingyan Wu
 subtitle: Due Feb 5 @ 11:59PM
 output: 
   html_document:
