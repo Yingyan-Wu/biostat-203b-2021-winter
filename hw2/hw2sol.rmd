@@ -1,5 +1,5 @@
 ---
-title: "Biostat 203B Homework 2"
+title: "Biostat 203B Homework 2 Solutions"
 author: Yingyan Wu
 subtitle: Due Feb 5 @ 11:59PM
 output: 
@@ -25,8 +25,8 @@ library(lubridate)
 os <- sessionInfo()$running
 if (str_detect(os, "Linux")) {
   mimic_path <- "/usr/203b-data/mimic-iv"
-} else if (str_detect(os, "macOS")) {
-  mimic_path <- "/Users/huazhou/Documents/Box Sync/MIMIC/mimic-iv-0.4"
+} else if (str_detect(os, "Windows")) {
+  mimic_path <- "C:/Users/Yingyan Wu/Documents/Dataset/MIMIC/mimic-iv-0.4"
 }
 ```
 
@@ -40,11 +40,22 @@ system(str_c("tree -s -L 2 ", shQuote(mimic_path)), intern = TRUE)
 
 At this moment, you should already get credentialed on the PhysioNet. Please include a screenshot of your `Data Use Agreement for the MIMIC-IV (v0.4)`.
 
+**Solution**: 
+![Data Use Agreement](Signed Data Use Agreement_Page_1.png)
+
 ## Q2. `read.csv` (base R) vs `read_csv` (tidyverse) vs `fread` (data.table)
 
 There are quite a few utilities in R for reading data files. Let us test the speed of reading a moderate sized compressed csv file, `admissions.csv.gz`, by three programs: `read.csv` in base R, `read_csv` in tidyverse, and `fread` in the popular data.table package. Is there any speed difference?
 
 In this homework, we stick to the tidyverse. 
+
+**Solution**: 
+```{r}
+system.time(read.csv(paste0(mimic_path, "/core/admissions.csv.gz")))
+system.time(read_csv(paste0(mimic_path, "/core/admissions.csv.gz")))
+system.time(fread(paste0(mimic_path, "/core/admissions.csv.gz")))
+```
+`read.csv` needs much more time than the other two functions using around 48 seconds. `fread` needs least time to run using around 3 seconds and around 5 seconds for `read_csv`.
 
 ## Q3. ICU stays
 
@@ -55,6 +66,28 @@ In this homework, we stick to the tidyverse.
 - length of ICU stay  
 - first ICU unit  
 - last ICU unit  
+
+**Solution**: 
+```{r}
+icustays <- read_csv(paste0(mimic_path, "/icu/icustays.csv.gz")) %>%
+  print(width = Inf)
+
+# Check unique stay_id
+icustays %>%
+  distinct(stay_id) %>%
+  nrow()
+
+# Check unique subject_id
+icustays %>%
+  distinct(subject_id) %>%
+  nrow()
+
+# Length of stay
+icustays %>%
+  ggplot()
+```
+
+
 
 ## Q4. `admission` data
 
@@ -90,6 +123,22 @@ Explore `patients.csv.gz` (<https://mimic-iv.mit.edu/docs/datasets/core/patients
 `labevents.csv.gz` (<https://mimic-iv.mit.edu/docs/datasets/hosp/labevents/>) contains all laboratory measurements for patients. 
 
 We are interested in the lab measurements of creatinine, potassium, sodium, chloride, bicarbonate, hematocrit, white blood cell count, glucose, magnesium, calcium, phosphorus, and lactate. Find the `itemid`s of these lab measurements from `d_labitems.csv.gz` and retrieve a subset of `labevents.csv.gz` only containing these items.
+
+**Solution**: 
+First take a look at first lines of the labevents data.
+```{r}
+system(str_c("zcat < ", shQuote(str_c(mimic_path, "/hosp/labevents.csv.gz")),
+             " | head"),
+       intern = TRUE)
+```
+
+
+```{r, eval = FALSE}
+lab_variables <- c("itemid", )
+
+labevents <- read_csv(paste0(mimic_path, "/core/admissions.csv.gz"), 
+                       col_select = all_of(lab_variables))
+```
 
 ## Q7. Vitals from chartered events
 
