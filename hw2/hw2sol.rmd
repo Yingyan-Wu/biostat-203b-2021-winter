@@ -7,7 +7,7 @@ output:
     toc: true
     toc_depth: 4 
 ---
-
+  
 Display machine information for reproducibility:
 ```{r}
 sessionInfo()
@@ -16,9 +16,13 @@ sessionInfo()
 ```{r setup}
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE) 
 # default cache is false, previous result are saved!
-library(tidyverse)
-library(data.table)
-library(lubridate)
+
+if (!require("pacman")){
+  install.packages("pacman", repos='http://cran.us.r-project.org')
+}
+
+p_load("here", "readr", "tidyverse", "magrittr", "plyr", "haven", "labelled", 
+       "lubridate", "data.table")
 ```
 
 ```{r}
@@ -46,10 +50,11 @@ At this moment, you should already get credentialed on the PhysioNet. Please inc
 ## Q2. `read.csv` (base R) vs `read_csv` (tidyverse) vs `fread` (data.table)
 
 There are quite a few utilities in R for reading data files. Let us test the speed of reading a moderate sized compressed csv file, `admissions.csv.gz`, by three programs: `read.csv` in base R, `read_csv` in tidyverse, and `fread` in the popular data.table package. Is there any speed difference?
-
-In this homework, we stick to the tidyverse. 
+  
+  In this homework, we stick to the tidyverse. 
 
 **Solution**: 
+
 ```{r}
 system.time(read.csv(paste0(mimic_path, "/core/admissions.csv.gz")))
 system.time(read_csv(paste0(mimic_path, "/core/admissions.csv.gz")))
@@ -60,7 +65,7 @@ system.time(fread(paste0(mimic_path, "/core/admissions.csv.gz")))
 ## Q3. ICU stays
 
 `icustays.csv.gz` (<https://mimic-iv.mit.edu/docs/datasets/icu/icustays/>) contains data about Intensive Care Units (ICU) stays. Summarize following variables using appropriate numerics or graphs:   
-
+  
 - how many unique `stay_id`?  
 - how many unique `subject_id`?  
 - length of ICU stay  
@@ -68,7 +73,9 @@ system.time(fread(paste0(mimic_path, "/core/admissions.csv.gz")))
 - last ICU unit  
 
 **Solution**: 
+
 ```{r}
+# Load the icustays.csv.gz
 icustays <- read_csv(paste0(mimic_path, "/icu/icustays.csv.gz")) %>%
   print(width = Inf)
 
@@ -84,9 +91,25 @@ icustays %>%
 
 # Length of stay
 icustays %>%
-  ggplot()
-```
+  ggplot() + geom_histogram(aes(x = los)) 
 
+icustays %>%
+  filter(los >= 100) %>%
+  ggplot() + geom_histogram(aes(x = los))
+
+# First ICU unit
+table(icustays$first_careunit)
+
+icustays %>%
+  ggplot() + geom_bar(aes(x = first_careunit)) +
+  theme(axis.text.x = element_text(angle = 90))
+
+# Last ICU unit
+icustays %>%
+  ggplot() + geom_bar(aes(x = last_careunit)) +
+  theme(axis.text.x = element_text(angle = 90))
+```
+There are 69619 unique `stay_id` in the `icustays` dataset and 50048 unique `subject_id`.
 
 
 ## Q4. `admission` data
@@ -111,12 +134,41 @@ Information of the patients admitted into hospital is available in `ADMISSION.cs
 
 Note it is possible that one patient (uniquely identified by the `SUBJECT_ID`) is admitted into hospital multiple times. When summarizing some demographic information, it makes sense to summarize based on unique patients. 
 
+**Solution**:
+  
+```{r}
+# Load the admissions.csv.gz
+admissions <- read_csv(paste0(mimic_path, "/core/admissions.csv.gz"))  %>%
+  print(width = Inf)
+
+# get the components
+#- Check the concordance of deathtime and hospital_expire_flag
+table(!is.na(admissions$deathtime), admissions$hospital_expire_flag, useNA = "ifany")
+
+admissions %<>%
+  mutate("admityear" = year(as_datetime(admittime)),
+         "admitmonth" = month(as_datetime(admittime)),
+         "admitmonthday" = mday(as_datetime(admittime)),
+         "admitweekday" = wday(as_datetime(admittime)),
+         "admithour" = hour(as_datetime(admittime))#,
+         )
+# admission year
+admissions %>%
+  ggplot + geom_histogram(aes(x = admityear))
+```
+There are two variables indicating the whether the patient died in the hospitalization. Based on the crosstab made to check the concordance, varaible `hospital_expire_flag` has more death value than the `deathtime`. To be conservetive to the analysis, the `deathtime` is used to indicate whether the patient died within hospitalization.
+
 ## Q5. `patient` data
 
 Explore `patients.csv.gz` (<https://mimic-iv.mit.edu/docs/datasets/core/patients/>) and summarize following variables using appropriate numerics and graphs:  
-
+  
 - `gender`  
 - `anchor_age` (explain pattern you see)
+
+```{r}
+
+```
+
 
 ## Q6. Lab results
 
@@ -137,7 +189,7 @@ system(str_c("zcat < ", shQuote(str_c(mimic_path, "/hosp/labevents.csv.gz")),
 lab_variables <- c("itemid", )
 
 labevents <- read_csv(paste0(mimic_path, "/core/admissions.csv.gz"), 
-                       col_select = all_of(lab_variables))
+                      col_select = all_of(lab_variables))
 ```
 
 ## Q7. Vitals from chartered events
