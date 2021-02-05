@@ -91,23 +91,28 @@ icustays %>%
 
 # Length of stay
 icustays %>%
-  ggplot() + geom_histogram(aes(x = los)) 
+  mutate(totaltime = as.numeric(outtime - intime)) %>%
+  select(totaltime) %>%
+  ggplot(aes(x = log(totaltime))) +
+  geom_histogram(aes(y=..density..), colour = "blue", fill = "gold", bins = 30) +
+  xlab("Log(total ICU stay") + ylab("Density of total ICU stay")
 
-icustays %>%
-  filter(los >= 100) %>%
-  ggplot() + geom_histogram(aes(x = los))
+# icustays %>%
+#   filter(los >= 100) %>%
+#   ggplot() + geom_histogram(aes(x = los))
 
 # First ICU unit
 table(icustays$first_careunit)
 
 icustays %>%
-  ggplot() + geom_bar(aes(x = first_careunit)) +
-  theme(axis.text.x = element_text(angle = 90))
+  ggplot(aes(x = first_careunit)) + 
+  geom_bar(aes(fill = first_careunit)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
 # Last ICU unit
 icustays %>%
-  ggplot() + geom_bar(aes(x = last_careunit)) +
-  theme(axis.text.x = element_text(angle = 90))
+  ggplot(aes(x = first_careunit)) + geom_bar(aes(fill = first_careunit)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
 There are 69619 unique `stay_id` in the `icustays` dataset and 50048 unique `subject_id`.
 
@@ -154,8 +159,14 @@ admissions %<>%
          )
 # admission year
 admissions %>%
-  ggplot + geom_histogram(aes(x = admityear))
+  distinct(., subject_id, .keep_all = T) %>%
+  ggplot(aes(x = admittime)) + 
+  geom_histogram(aes(y = ..count..), bin = 30) +
+  xlab("Admission Year") +
+  ylab("Total Count") +
+  theme(axis.test.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
+
 There are two variables indicating the whether the patient died in the hospitalization. Based on the crosstab made to check the concordance, varaible `hospital_expire_flag` has more death value than the `deathtime`. To be conservetive to the analysis, the `deathtime` is used to indicate whether the patient died within hospitalization.
 
 ## Q5. `patient` data
@@ -166,7 +177,15 @@ Explore `patients.csv.gz` (<https://mimic-iv.mit.edu/docs/datasets/core/patients
 - `anchor_age` (explain pattern you see)
 
 ```{r}
+patients <- read_csv(paste0(mimic_path, "/core/patients.csv.gz"))  %>%
+  print(width = Inf)
 
+patients %>%
+  filter(anchor_age !=0) %>%
+  select(abchor_age) %>%
+  ggplot(aes(x = anchor_age)) +
+  geom_histogram(aes(y = ..density..), position = "identity", fill = "red", bin = 30) +
+  geom_demsity(alpha = 0.6) + theme_classic
 ```
 
 
