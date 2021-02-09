@@ -1,7 +1,7 @@
 ---
 title: "Biostat 203B Homework 2 Solutions"
 author: Yingyan Wu
-subtitle: Due Feb 5 @ 11:59PM
+subtitle: Due Feb 10 @ 11:59PM
 output: 
   html_document:
     toc: true
@@ -30,7 +30,7 @@ os <- sessionInfo()$running
 if (str_detect(os, "Linux")) {
   mimic_path <- "/usr/203b-data/mimic-iv"
 } else if (str_detect(os, "Windows")) {
-  mimic_path <- "C:/Users/Yingyan Wu/Documents/Dataset/MIMIC/mimic-iv-0.4"
+  mimic_path <- "C:/Users/Yingyan Wu/Documents/Dataset/mimic-iv"
 }
 ```
 
@@ -60,7 +60,7 @@ system.time(read.csv(paste0(mimic_path, "/core/admissions.csv.gz")))
 system.time(read_csv(paste0(mimic_path, "/core/admissions.csv.gz")))
 system.time(fread(paste0(mimic_path, "/core/admissions.csv.gz")))
 ```
-`read.csv` needs much more time than the other two functions using around 48 seconds. `fread` needs least time to run using around 3 seconds and around 5 seconds for `read_csv`.
+`read.csv` needs much more time than the other two functions using around 45 seconds. `fread` needs least time to run using around 3 seconds and around 5 seconds for `read_csv`.
 
 ## Q3. ICU stays
 
@@ -94,12 +94,11 @@ icustays %>%
   mutate(totaltime = as.numeric(outtime - intime)) %>%
   select(totaltime) %>%
   ggplot(aes(x = log(totaltime))) +
-  geom_histogram(aes(y=..density..), colour = "blue", fill = "gold", bins = 30) +
-  xlab("Log(total ICU stay") + ylab("Density of total ICU stay")
+  geom_histogram(aes(y=..density..), colour = "black", fill = "grey", bins = 30) +
+  xlab("Log(total ICU stay)") + ylab("Density of total ICU stay")
 
-# icustays %>%
-#   filter(los >= 100) %>%
-#   ggplot() + geom_histogram(aes(x = los))
+icustays %>%
+  ggplot(aes(x = log(los))) + geom_histogram((aes(x = log(los))))
 
 # First ICU unit
 table(icustays$first_careunit)
