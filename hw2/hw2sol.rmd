@@ -60,6 +60,7 @@ system.time(read.csv(paste0(mimic_path, "/core/admissions.csv.gz")))
 system.time(read_csv(paste0(mimic_path, "/core/admissions.csv.gz")))
 system.time(fread(paste0(mimic_path, "/core/admissions.csv.gz")))
 ```
+
 `read.csv` needs much more time than the other two functions using around 45 seconds. `fread` needs least time to run using around 3 seconds and around 5 seconds for `read_csv`.
 
 ## Q3. ICU stays
@@ -91,14 +92,18 @@ icustays %>%
 
 # Length of stay
 icustays %>%
-  mutate(totaltime = as.numeric(outtime - intime)) %>%
-  select(totaltime) %>%
-  ggplot(aes(x = log(totaltime))) +
-  geom_histogram(aes(y=..density..), colour = "black", fill = "grey", bins = 30) +
-  xlab("Log(total ICU stay)") + ylab("Density of total ICU stay")
+  ggplot(aes(x = log(los))) +   
+  geom_histogram(
+    aes(y=..density..), colour = "black", fill = "grey", bins = 30) +
+  xlab("Log(Length of ICU stay)") + ylab("Density")
 
-icustays %>%
-  ggplot(aes(x = log(los))) + geom_histogram((aes(x = log(los))))
+# Another option to plot ICU stay (using ouottime and intime to calculate)
+# icustays %>%
+#   mutate(totaltime = as.numeric(outtime - intime)) %>%
+#   select(totaltime) %>%
+#   ggplot(aes(x = log(totaltime))) +
+#   geom_histogram(aes(y=..density..), colour = "black", fill = "grey", bins = 30) +
+#   xlab("Log(total ICU stay)") + ylab("Density")
 
 # First ICU unit
 table(icustays$first_careunit)
@@ -106,14 +111,19 @@ table(icustays$first_careunit)
 icustays %>%
   ggplot(aes(x = first_careunit)) + 
   geom_bar(aes(fill = first_careunit)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(title = "Bar plot of first ICU type")
 
 # Last ICU unit
+table(icustays$last_careunit)
+
 icustays %>%
-  ggplot(aes(x = first_careunit)) + geom_bar(aes(fill = first_careunit)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+  ggplot(aes(x = last_careunit)) + 
+  geom_bar(aes(fill = last_careunit)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + 
+  labs(title = "Bar plot of last ICU type")
 ```
-There are 69619 unique `stay_id` in the `icustays` dataset and 50048 unique `subject_id`.
+There are 69619 unique `stay_id` in the `icustays` dataset and 50048 unique `subject_id` in the dataset.
 
 
 ## Q4. `admission` data
