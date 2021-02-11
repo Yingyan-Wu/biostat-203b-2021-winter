@@ -29,9 +29,13 @@ p_load("here", "readr", "tidyverse", "magrittr", "plyr", "haven", "labelled",
 os <- sessionInfo()$running
 if (str_detect(os, "Linux")) {
   mimic_path <- "/usr/203b-data/mimic-iv"
+  mimic_derived_path <- "/usr/203b-data/mimic-iv-derived-data"
 } else if (str_detect(os, "Windows")) {
   mimic_path <- "C:/Users/Yingyan Wu/Documents/Dataset/mimic-iv"
+  mimic_derived_path <- "C:/Users/Yingyan Wu/Documents/Dataset/mimic-iv-derived-data"
 }
+
+
 ```
 
 Use tidyverse (ggpot2, dplyr) to explore the [MIMIC-IV](https://mimic-iv.mit.edu) data introduced in [homework 1](https://ucla-biostat203b-2021winter.github.io/hw/hw1/hw1.html).
@@ -402,37 +406,74 @@ The gender distribution in the patients data is pretty even. For the anchor age,
 We are interested in the lab measurements of creatinine, potassium, sodium, chloride, bicarbonate, hematocrit, white blood cell count, glucose, magnesium, calcium, phosphorus, and lactate. Find the `itemid`s of these lab measurements from `d_labitems.csv.gz` and retrieve a subset of `labevents.csv.gz` only containing these items.
 
 **Solution**: 
-First take a look at first lines of the labevents data.
-```{r, eval=F}
+
+```{r eval = F}
+# Take a look at first lines of the lab events data.
+if (str_detect(os, "Linux")) {
 system(str_c("zcat < ", shQuote(str_c(mimic_path, "/hosp/labevents.csv.gz")),
              " | head"),
-       intern = TRUE)
-```
+       intern = TRUE)}
 
+# Read in the data dictionary
+dlabitems <- read_csv(paste0(mimic_path, "/hosp/d_labitems.csv.gz")) %>%
+  print(width = Inf)
 
-```{r, eval = FALSE}
+# Read the dataset
 if(!file.exists("labevents_icustays.csv.gz")){
-  system.time(labevents_tble <- 
-                fread(str_c(mimic_path, "/hosp/labevents.csv.gz"),
-                      select = c("subject_id", "hadm_id", "itemid", "charttime", "valuenum"), 
+  system.time(labevents <- 
+                fread(paste0(mimic_path, "/hosp/labevents.csv.gz"),
+                      select = c("subject_id", "hadm_id", "itemid", 
+                                 "charttime", "valuenum"), 
                       nThread = 4))
-  labevents_tble %>%
-    semi_join(icustays_tble, by = c("subject_id", "hadm_id")) %>%
+  labevents %>%
+    semi_join(icustays, by = c("subject_id", "hadm_id")) %>%
     fwrite("labevents_icustays.csv.gz", nThread = 4)
 }
 
-system.time(labevents_tab <- fread("labevents_icustays.csv.gz"))
-labevents_tab %>%
+system.time(labevents <- fread("labevents_icustays.csv.gz", nThread = 4))
+
+# system.time(labevents <- fread("labevents_icustays.csv.gz"))
+labevents %>%
   as.tibble() %>%
   print(width = Inf)
 
+# Find the item id for the lab measurements we are interested
+labitems <- c("creatinine", "potassium", "sodium", "chloride", "bicarbonate", "hematocrit", "white blood cell", "glucose", "magnesium", "calcium", "lactate")
+
+itemids <- rep(0, length(labitems))
+i <- 1
+
+for (labitem in labitems){
+  print(str_interp("search for ${labitem}"))
+  itemid_list <- dlabitems %>%
+    filter(str_detect(label, regex(labitem, ignore_case = T))) %>%
+    .$itemid
+  
+  itemid <- labevents %>%
+    filter(itemid %in% itemid_list) %>%
+    count(itemid) %>%
+    arrange(desc(n)) %>%
+    slice(1) %>%
+    .$itemid
+  itemids[i] <- itemid
+  i <- i + 1
+}
+
+labitem_itemid <- tibble(itemid = itemids, labitem = labitems) %>%
+  print(width = Width)
+
+# Further filter rows that only contains these items
+labevents <- labevents %>%
+  as_tibble() %>%
+  # only items in itemid
+  filter(itemid %in% labitem_itemid$itemid) %>%
+  # force charttime to be datetime
+  mutate(charttime = ymd_hms(charttime)) %>%
+  print(width = Inf)
 
 
-lab_variables <- c("itemid", )
-
-labevents <- read_csv(paste0(mimic_path, "/core/admissions.csv.gz"), 
-                      col_select = all_of(lab_variables))
 ```
+
 
 ## Q7. Vitals from chartered events
 
