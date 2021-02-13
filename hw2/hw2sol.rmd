@@ -1,7 +1,7 @@
 ---
 title: "Biostat 203B Homework 2 Solutions"
 author: Yingyan Wu
-subtitle: Due ~~Feb 5~~ Feb 10 @ 11:59PM
+subtitle: Due ~~Feb 5~~ Feb 12 @ 11:59PM
 output: 
   html_document:
     toc: true
@@ -532,7 +532,8 @@ if(!file.exists("chartevents_icustays.csv.gz")){
   system.time(chartevents <- 
                 fread(paste0(mimic_path, "/icu/chartevents.csv.gz"),
                       select = c("subject_id", "hadm_id", "stay_id",
-                                 "itemid", "charttime", "valuenum"),                       nThread = 4))
+                                 "itemid", "charttime", "valuenum"), 
+                      nThread = 4))
   chartevents %>%
     semi_join(icustays, by = c("subject_id", "hadm_id", "stay_id")) %>%
     fwrite("chartevents_icustays.csv.gz", nThread = 4)
