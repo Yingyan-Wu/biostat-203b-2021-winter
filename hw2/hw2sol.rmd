@@ -525,7 +525,7 @@ chartitem_itemid <- dchartitems %>%
 ```
 
 
-```{r, eval=F}
+```{r, eval = FALSE}
 if (str_detect(os, "Linux")) {
   # Take a look at first lines of the lab events data.
   system(str_c("zcat < ", shQuote(str_c(mimic_path, "/icu/chartevents.csv.gz")),
