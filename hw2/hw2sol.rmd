@@ -125,6 +125,7 @@ icustays %>%
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + 
   labs(title = "Bar chart of last ICU type")
 ```
+
 There are 69619 unique `stay_id` in the `icustays` dataset and 50048 unique `subject_id` in the dataset.50048 patients having 69619 ICU stays are included in the dataset.
 
 
@@ -470,7 +471,8 @@ labitem_itemid <- tibble(itemid = itemids, labitem = labitems) %>%
 
 
 ```{r}
-# To save time, save and add the labitem_itemid tibble manually
+# To save knit time, save and add the labitem_itemid tibble manually
+# I've been stuck on the previous chunk for more than 20 minutes.
 labitem_itemid <- tibble(
   itemid = c(50912, 50971, 50983, 50902, 50882, 
              51221, 51301, 50931, 50960, 50893, 50813), 
