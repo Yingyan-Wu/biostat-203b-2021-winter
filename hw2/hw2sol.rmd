@@ -416,7 +416,10 @@ if (str_detect(os, "Linux")) {
 system(str_c("zcat < ", shQuote(str_c(mimic_path, "/hosp/labevents.csv.gz")),
              " | head"),
        intern = TRUE)}
+```
 
+
+```{r}
 # Read in the data dictionary
 dlabitems <- read_csv(paste0(mimic_path, "/hosp/d_labitems.csv.gz")) %>%
   print(width = Inf)
@@ -464,7 +467,9 @@ for (labitem in labitems){
 
 labitem_itemid <- tibble(itemid = itemids, labitem = labitems) %>%
   print(width = Width)
+```
 
+```{r, eval = FALSE}
 # Further filter rows that only contains these items
 labevents <- labevents %>%
   as_tibble() %>%
@@ -513,13 +518,13 @@ chartitem_itemid <- dchartitems %>%
 ```{r, eval=F}
 if (str_detect(os, "Linux")) {
   # Take a look at first lines of the lab events data.
-system(str_c("zcat < ", shQuote(str_c(mimic_path, "/icu/chartevents.csv.gz")),
-             " | head"), 
-       intern = TRUE)
+  system(str_c("zcat < ", shQuote(str_c(mimic_path, "/icu/chartevents.csv.gz")),
+               " | head"), 
+         intern = TRUE)
   # get a sense of how many lines in chartevents.csv.gz? 327,363,275 rows
- system(str_c("zcat < ", shQuote(str_c(mimic_path, "/icu/chartevents.csv.gz")),
-             " | wc -l"),
-       intern = TRUE)
+  system(str_c("zcat < ", shQuote(str_c(mimic_path, "/icu/chartevents.csv.gz")),
+               " | wc -l"),
+         intern = TRUE)
 }
 
 # First attempt for reading the dataset
@@ -536,29 +541,39 @@ if(!file.exists("chartevents_icustays.csv.gz")){
 ```
 
 ```{bash, eval = F}
+# Another attempt to read the data
 # To create a subset (csv.gz format) of the dataset
 # containing the variables and items we want
-zcat < /usr/203b-data/mimic-iv/icu/chartevents.csv.gz | awk -F, '{OFS = ","} {if ($6 == 220045 || $6 == 220050 || $6 == 220052 || $6 == 220179 || $6 == 220181 || $6 == 220210 || $6 == 223761 || $6 == 229862) print $1, $2, $3, $4, $6, $8}' | gzip > chartevents_filtered_itemid.csv.gz
+zcat < /usr/203b-data/mimic-iv/icu/chartevents.csv.gz | \
+awk -F, '{OFS = ","} \
+{if ($6 == 220045 || $6 == 220050 || $6 == 220052 || $6 == 220179 ||\
+$6 == 220181 || $6 == 220210 || $6 == 223761 || $6 == 229862)\
+print $1, $2, $3, $4, $6, $8}' | \ 
+gzip > chartevents_filtered_itemid.csv.gz
 ```
 
 To save time, read in the derived dataset from the server created by Dr. Zhou through the steps above.
 
 ```{r}
 # Read in the derived dataset from the server created by Dr. Zhou
-chartevents <- fread(paste0(mimic_derived_path, "/chartevents_filtered_itemid.csv.gz"), header = FALSE,
-                            col.names = c("subject_id",
-                                          "hadm_id",
-                                          "stay_id", 
-                                          "charttime",
-                                          "itemid",
-                                          "valuenum"), nThread = 4) %>%
+chartevents <- fread(paste0(mimic_derived_path, 
+                            "/chartevents_filtered_itemid.csv.gz"), 
+                     header = FALSE,
+                     col.names = c("subject_id",
+                                   "hadm_id",
+                                   "stay_id", 
+                                   "charttime",
+                                   "itemid",
+                                   "valuenum"), nThread = 4) %>%
   as_tibble() %>%
   mutate_at(c("subject_id", "hadm_id", "stay_id", "itemid"), as.numeric) %>%
   mutate(charttime = ymd_hms(charttime)) %>%
   print(width = Inf)
 
-labevents <- fread(paste0(mimic_derived_path, "/labevents_filtered_itemid.csv.gz"), header = FALSE,
-                     col.names = c("subject_id", "hadm_id", "itemid", 
+labevents <- fread(paste0(mimic_derived_path, 
+                          "/labevents_filtered_itemid.csv.gz"), 
+                   header = FALSE,
+                   col.names = c("subject_id", "hadm_id", "itemid", 
                                  "charttime", "valuenum"), nThread = 4) %>%
   as_tibble() %>%
   mutate_at(c("subject_id", "hadm_id", "itemid"), as.numeric) %>%
@@ -606,7 +621,8 @@ labevents_uniq <- labevents %>%
   # Only keep the subject_id and hadm_id that are in the icustays_uniq dataset
   semi_join(icustays_uniq, by = c("subject_id", "hadm_id")) %>%
   # Pull in the intime from icustays_uniq
-  left_join(select(icustays_uniq, subject_id, hadm_id, intime), by = c("subject_id", "hadm_id")) %>%
+  left_join(select(icustays_uniq, subject_id, hadm_id, intime), 
+            by = c("subject_id", "hadm_id")) %>%
   # only keep lab items after ICU intime %>%
   filter(charttime >= intime) %>%
   group_by(subject_id, itemid) %>%
@@ -616,16 +632,27 @@ labevents_uniq <- labevents %>%
   # Drop the charttime and intime columns
   select(-charttime, -intime) %>%
   spread(key = itemid, value = valuenum) %>%
-  rename_at(vars(as.character(labitem_itemid$itemid)), ~labitem_itemid$labitem) %>% 
+  rename_at(vars(as.character(labitem_itemid$itemid)), 
+            ~labitem_itemid$labitem) %>% 
   print(width = Inf)
 
+#Merge the datasets
+final_dataset <- right_join(labevents_uniq, icustays_uniq, 
+                            by = c("subject_id", "hadm_id")) 
+
 #Chart events
+
+# Since the chart events ided "229862" doesn't exist, 
+# delete this value from chartitem_itemid table
+chartitem_itemid %<>% filter(itemid != 229862)
+
 chartevents_uniq <- chartevents %>%
   # Only keep the subject_id and hadm_id that are in the icustays_uniq dataset
   semi_join(icustays_uniq, by = c("subject_id", "hadm_id")) %>%
   # Pull in the intime from icustays_uniq
-  left_join(select(icustays_uniq, subject_id, hadm_id, intime), by = c("subject_id", "hadm_id")) %>%
-  # only keep lab items after ICU intime %>%
+  left_join(select(icustays_uniq, subject_id, hadm_id, intime), 
+            by = c("subject_id", "hadm_id")) %>%
+  # only keep vital items after ICU intime %>%
   filter(charttime >= intime) %>%
   group_by(subject_id, itemid) %>%
   # only keep the first vital measurements for each item
@@ -634,8 +661,28 @@ chartevents_uniq <- chartevents %>%
   # Drop the charttime and intime columns
   select(-charttime, -intime) %>%
   spread(key = itemid, value = valuenum) %>%
-  rename_at(vars(as.character(chartitem_itemid$itemid)), ~chartitem_itemid$label) %>% 
+  rename_at(vars(as.character(chartitem_itemid$itemid)), 
+            ~chartitem_itemid$label) %>% 
   print(width = Inf)
+
+# Merge the datasets & create the indicator for 
+# those who died within 30 days of hospital admission
+final_dataset <- right_join(chartevents_uniq, final_dataset, 
+                            by = c("subject_id", "hadm_id")) %>%
+  mutate("flag_die30" = 
+           case_when((day(deathtime) - day(admittime)) > 30 ~ 0,
+                     (day(deathtime) - day(admittime)) <= 30 ~ 1))
+
+# # Sanity check
+# table(final_dataset$flag_die30, useNA = "ifany")
+# table(is.na(icustays_uniq$deathtime))
+# table(is.na(icustays_uniq$admittime))
+# test <- icustays_uniq %>%
+#   mutate("flag_die30" = case_when(
+#     (day(deathtime) - day(admittime)) > 30 ~ 0,
+#     (day(deathtime) - day(admittime)) <= 30 ~ 1))
+# table(test$flag_die30, useNA = "ifany")
+# table(final_dataset$age_at_admission, useNA = "ifany")
 
 ```
 
