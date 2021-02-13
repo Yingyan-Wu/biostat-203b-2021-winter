@@ -35,8 +35,6 @@ if (str_detect(os, "Linux")) {
   mimic_derived_path <- 
     "C:/Users/Yingyan Wu/Documents/Dataset/mimic-iv-derived-data"
 }
-
-
 ```
 
 Use tidyverse (ggpot2, dplyr) to explore the [MIMIC-IV](https://mimic-iv.mit.edu) data introduced in [homework 1](https://ucla-biostat203b-2021winter.github.io/hw/hw1/hw1.html).
@@ -410,7 +408,7 @@ We are interested in the lab measurements of creatinine, potassium, sodium, chlo
 
 **Solution**: 
 
-```{r, eval=F}
+```{r}
 # Take a look at first lines of the lab events data.
 if (str_detect(os, "Linux")) {
 system(str_c("zcat < ", shQuote(str_c(mimic_path, "/hosp/labevents.csv.gz")),
@@ -419,25 +417,24 @@ system(str_c("zcat < ", shQuote(str_c(mimic_path, "/hosp/labevents.csv.gz")),
 ```
 
 
-```{r}
+```{r， eval = FALSE}
 # Read in the data dictionary
 dlabitems <- read_csv(paste0(mimic_path, "/hosp/d_labitems.csv.gz")) %>%
   print(width = Inf)
 
 # Read the dataset
 if(!file.exists("labevents_icustays.csv.gz")){
-  system.time(labevents <- 
-                fread(paste0(mimic_path, "/hosp/labevents.csv.gz"),
+  labevents <- fread(paste0(mimic_path, "/hosp/labevents.csv.gz"),
                       select = c("subject_id", "hadm_id", "itemid", 
                                  "charttime", "valuenum"), 
-                      nThread = 4))
-  labevents %>%
-    semi_join(icustays, by = c("subject_id", "hadm_id")) %>%
-    fwrite("labevents_icustays.csv.gz", nThread = 4)
+                      nThread = 4)
+   labevents %>%
+     semi_join(icustays, by = c("subject_id", "hadm_id")) %>%
+     fwrite("labevents_icustays.csv.gz", nThread = 4)
 }
 
 labevents %>%
-  as.tibble() %>%
+  as_tibble() %>%
   print(width = Inf)
 
 # Find the item id for the lab measurements we are interested
@@ -468,6 +465,19 @@ for (labitem in labitems){
 labitem_itemid <- tibble(itemid = itemids, labitem = labitems) %>%
   print(width = Width)
 ```
+
+```{r}
+# To save time, save and add the labitem_itemid tibble manually
+labitem_itemid <- tibble(
+  itemid = c(50912, 50971, 50983, 50902, 50882, 
+             51221, 51301, 50931, 50960, 50893, 50813), 
+  labitem = c("creatinine", "potassium", "sodium", 
+              "chloride", "bicarbonate", "hematocrit", 
+              "white blood cell", "glucose", "magnesium", 
+              "calcium", "lactate")) %>%
+  print(width = Inf)
+```
+
 
 ```{r, eval = FALSE}
 # Further filter rows that only contains these items
@@ -532,7 +542,8 @@ if(!file.exists("chartevents_icustays.csv.gz")){
   system.time(chartevents <- 
                 fread(paste0(mimic_path, "/icu/chartevents.csv.gz"),
                       select = c("subject_id", "hadm_id", "stay_id",
-                                 "itemid", "charttime", "valuenum"),                       nThread = 4))
+                                 "itemid", "charttime", "valuenum"), 
+                      nThread = 4))
   chartevents %>%
     semi_join(icustays, by = c("subject_id", "hadm_id", "stay_id")) %>%
     fwrite("chartevents_icustays.csv.gz", nThread = 4)
