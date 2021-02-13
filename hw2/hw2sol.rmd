@@ -64,7 +64,7 @@ system.time(read_csv(paste0(mimic_path, "/core/admissions.csv.gz")))
 system.time(fread(paste0(mimic_path, "/core/admissions.csv.gz")))
 ```
 
-`read.csv` needs much more time than the other two functions using around 45 seconds. `fread` needs least time to run using around 3 seconds and around 5 seconds for `read_csv`.
+`read.csv` needs much more time than the other two functions using around 45 seconds. `fread` needs least time to run using around 3 seconds and around 5 seconds for `read_csv`. (The time length changes drastically each time. Overall `fread` uses least time to read `read_csv` uses more time than `fread` and `read.csv` costs most time)
 
 ## Q3. ICU stays
 
@@ -332,7 +332,7 @@ There is a drastical drop for death after 2190 which aligns with the admission y
 
 **Number of admissions per patient**:
 
-There are over a half of the patients in the admissions dataset has only one admission.The maximum of # of admissions per patient is 238. Most of the patients are admitted to ICU with less than 25 tim es.
+There are over a half of the patients in the admissions dataset has only one admission.The maximum of # of admissions per patient is 238. Most of the patients are admitted to ICU with less than 25 times.
 
 **Admission type**:
 
@@ -417,6 +417,7 @@ system(str_c("zcat < ", shQuote(str_c(mimic_path, "/hosp/labevents.csv.gz")),
 ```
 
 
+
 ```{r， eval = FALSE}
 # Read in the data dictionary
 dlabitems <- read_csv(paste0(mimic_path, "/hosp/d_labitems.csv.gz")) %>%
@@ -466,6 +467,8 @@ labitem_itemid <- tibble(itemid = itemids, labitem = labitems) %>%
   print(width = Width)
 ```
 
+
+
 ```{r}
 # To save time, save and add the labitem_itemid tibble manually
 labitem_itemid <- tibble(
@@ -477,6 +480,7 @@ labitem_itemid <- tibble(
               "calcium", "lactate")) %>%
   print(width = Inf)
 ```
+
 
 
 ```{r, eval = FALSE}
@@ -682,7 +686,8 @@ final_dataset <- right_join(chartevents_uniq, final_dataset,
                             by = c("subject_id", "hadm_id")) %>%
   mutate("flag_die30" = 
            case_when((day(deathtime) - day(admittime)) > 30 ~ 0,
-                     (day(deathtime) - day(admittime)) <= 30 ~ 1))
+                     (day(deathtime) - day(admittime)) <= 30 ~ 1)) %>%
+  print(width = Inf)
 
 # # Sanity check
 # table(final_dataset$flag_die30, useNA = "ifany")
