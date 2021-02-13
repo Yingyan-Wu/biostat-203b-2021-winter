@@ -1,7 +1,7 @@
 ---
 title: "Biostat 203B Homework 2 Solutions"
 author: Yingyan Wu
-subtitle: Due ~~Feb 5~~ Feb 10 @ 11:59PM
+subtitle: Due ~~Feb 5~~ Feb 12 @ 11:59PM
 output: 
   html_document:
     toc: true
