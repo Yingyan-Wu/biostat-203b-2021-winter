@@ -98,26 +98,24 @@ icustays_tble <- tbl(con, Id(schema = "mimic_icu", table = "icustays")) %>%
 
 4. Connect to the patients table.
 ```{r}
-# TODO
-# patients_tble <-
+patients_tble <- tbl(con, Id(schema = "mimic_core", table = "patients")) %>%
+  print(width = Inf)
 ```
 
 5. Connect to the admissions table.
 ```{r}
-# TODO
-# admissions_tble <- 
+admissions_tble <- tbl(con, Id(schema = "mimic_core", table = "admissions")) %>%
+  print(width = Inf)
 ```
 
 6. Connect to the `mimic_labevents_icu` table.
 ```{r}
-# TODO
-# labevents_tble <-
+labevents_tble <- tbl(con, Id(schema = "public", table = "mimic_labevents_icu")) %>% print(width = Inf)
 ```
 
 7. Connect to `mimic_chartevents_icu` table.
 ```{r}
-# TODO
-# chartevents_tble <- 
+chartevents_tble <- tbl(con, Id(schema = "public", table = "mimic_chartevents_icu")) %>% print(width = Inf)
 ```
 
 8. Put things together. Using one chain of pipes `%>%` to perform following data wrangling steps: (i) keep only the first ICU stay of each unique patient, (ii) merge in admissions and patients tables, (iii) keep adults only (age at admission >= 18), (iv) merge in the labevents and chartevents tables, (v) display the SQL query, (vi) collect SQL query result into memory as a tibble, (vii) create an indicator for 30-day mortality, (viii) save the final tibble to an `icu_cohort.rds` R data file in the `mimiciv_shiny` folder.
@@ -130,8 +128,37 @@ if (!dir.exists("mimiciv_shiny")) {
 ```
 
 ```{r}
-# TODO
-# icustays_tble %>%
+icustays_tble %>% 
+  # keep only the first ICU stay of each unique patient
+  group_by(subject_id) %>%
+  filter(rank(intime) == 1) %>%
+  ungroup() %>%
+  # merge the admissions and patients tables
+  left_join(admissions_tble, by = c("subject_id", "hadm_id")) %>%
+  left_join(patients_tble, by = "subject_id") %>%
+  # keep adults only
+  mutate(age_at_admission = year(admittime) - anchor_year + anchor_age) %>%
+  filter(age_at_admission > 18) %>%
+  # merge in the labevents and chartevents tables
+  left_join(labevents_tble, by = c("subject_id", "hadm_id")) %>%
+  left_join(chartevents_tble, by = c("subject_id", "hadm_id")) %>%
+  # display the SQL query
+  show_query() %>%
+  # collect SQL query result into memory as a tibble
+  # create an indicator for 30-day mortality
+  mutate()
+
+
+%>%
+
+  
+test %>% print(width = Inf)
+  
+  
+  
+  
+  # saveRDS(str_c("/home/asburysean/biostat-203b-2021"."-winter/Hw3/mimiciv_shiny/icu_cohort.rds"))
+
 ```
 
 
