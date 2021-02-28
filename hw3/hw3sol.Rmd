@@ -154,17 +154,6 @@ icustays_tble %>%
   # in the shiny folder
   saveRDS("./mimiciv_shiny/icu_cohort.rds")
 
-
-%>%
-
-  
-test %>% print(width = Inf)
-  
-  
-  
-  
-  # saveRDS(str_c("/home/asburysean/biostat-203b-2021"."-winter/Hw3/mimiciv_shiny/icu_cohort.rds"))
-
 ```
 
 
