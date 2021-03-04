@@ -143,9 +143,9 @@ icustays_tble %>%
   left_join(labevents_tble, by = c("subject_id", "hadm_id")) %>%
   left_join(chartevents_tble, by = c("subject_id", "hadm_id")) %>%
   # v. display the SQL query
-  collect() %>%
+  show_query() %>%
   # vi. collect SQL query result into memory as a tibble
-  # collect() %>%
+  collect()
   # vii. create an indicator for 30-day mortality
   mutate("flag_die30" =
            case_when((day(deathtime) - day(admittime)) > 30 ~ 0,
