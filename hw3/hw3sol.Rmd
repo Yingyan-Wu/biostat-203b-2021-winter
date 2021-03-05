@@ -144,8 +144,9 @@ icustays_tble %>%
   left_join(chartevents_tble, by = c("subject_id", "hadm_id")) %>%
   # v. display the SQL query
   show_query() %>%
+  # collect() %>%
   # vi. collect SQL query result into memory as a tibble
-  collect()
+  as_tibble() %>%
   # vii. create an indicator for 30-day mortality
   mutate("flag_die30" =
            case_when((day(deathtime) - day(admittime)) > 30 ~ 0,
@@ -166,3 +167,5 @@ rm(list = ls())
 ## Q2. Shiny app
 
 Develop a Shiny app for exploring the ICU cohort data created in Q1. The app should reside in the `mimiciv_shiny` folder. The app should provide easy access to the graphical and numerical summaries of variables (demographics, lab measurements, vitals) in the ICU cohort.
+
+**Solution**: See the shiny app folder.
