@@ -11,7 +11,8 @@ icu_cohort <- readRDS("icu_cohort.rds")
 
 #---- Set up variables ----
 # colnames(icu_cohort)
-stratifiedvar <- c("admission_type", "flag_die30", "insurance")
+# stratifiedvar <- c("gender", "ethnicity", "admission_type", "insurance", 
+#                    "flag_die30")
 demovar <- c("age_at_admission", "gender", "ethnicity", "language", 
              "insurance", "marital_status")
 labvar <- c("bicarbonate", "calcium", "chloride", "creatinine", "glucose", 
@@ -50,7 +51,7 @@ ui <- fluidPage(
                  #             label = "Stratified by:",
                  #             choices = stratifiedvar,
                  #             # selected = NULL,
-                 #             selected = "flag_die_30")
+                 #             selected = "flag_die30")
                ),
                mainPanel(
                  # summary statistics table
@@ -91,7 +92,7 @@ ui <- fluidPage(
                  #             label = "Stratified by:",
                  #             choices = stratifiedvar,
                  #             # selected = NULL,
-                 #             selected = "flag_die_30")
+                 #             selected = "flag_die30")
                  
                ),
                mainPanel(
@@ -133,7 +134,7 @@ ui <- fluidPage(
                  #             label = "Stratified by:",
                  #             choices = stratifiedvar,
                  #             # selected = NULL,
-                 #             selected = "flag_die_30")
+                 #             selected = "flag_die30")
                ),
                mainPanel(
                  # summary statistics table
