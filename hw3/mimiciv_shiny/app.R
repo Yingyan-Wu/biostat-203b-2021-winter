@@ -2,13 +2,9 @@
 library(shiny)
 library(tidyverse)
 
-# Source helpers ----
-# didn't use!
-# source("helpers.R")
-
 #---- Load data ----
-icu_cohort <- readRDS("icu_cohort.rds")
-
+icu_cohort <- readRDS("./hw3/mimiciv_shiny/icu_cohort.rds")
+                      
 #---- Set up variables ----
 # colnames(icu_cohort)
 # stratifiedvar <- c("gender", "ethnicity", "admission_type", "insurance", 
