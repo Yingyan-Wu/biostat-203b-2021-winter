@@ -3,7 +3,7 @@ library(shiny)
 library(tidyverse)
 
 #---- Load data ----
-icu_cohort <- readRDS("./hw3/mimiciv_shiny/icu_cohort.rds")
+icu_cohort <- readRDS("icu_cohort.rds")
                       
 #---- Set up variables ----
 # colnames(icu_cohort)
