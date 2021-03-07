@@ -41,9 +41,9 @@ Read the tutorial for `miceRanger`.
 
 *MCAR*: represents for missing completely at random. Missingness does not depend on either observed or unobserved quantities. 
 
-*MAR*: represents for missing at random.Missingness depends on observed quantities could be any other variables
+*MAR*: represents for missing at random. Missingness depends on observed quantities could be any other variables
 
-*MNAR*: represents for missing not at random. Missingness may depend on unobserved quantities itself.
+*MNAR*: represents for missing not at random. Missingness may depend on unobserved quantities itself. The probability of being missing varies for reasons that are unknown.
 
 2. Explain in a couple of sentences how the Multiple Imputation by Chained Equations (MICE) work.
 
