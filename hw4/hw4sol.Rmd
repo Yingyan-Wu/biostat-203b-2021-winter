@@ -31,23 +31,29 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
 
     A more thorough book treatment of the practical imputation strategies is the book [*_Flexible Imputation of Missing Data_*](https://stefvanbuuren.name/fimd/) by Stef van Buuren. 
 
-**solution**:
+    **Solution**:
 
-Read the tutorial for `miceRanger`.
+    Read the tutorial for `miceRanger`.
 
 1. Explain the jargon MCAR, MAR, and MNAR.
 
-**solution**:
+    **Solution**:
 
-*MCAR*: represents for missing completely at random. Missingness does not depend on either observed or unobserved quantities. 
+    *MCAR*: represents for missing completely at random. Missingness does not depend on either observed or unobserved quantities. 
 
-*MAR*: represents for missing at random. Missingness depends on observed quantities could be any other variables
+    *MAR*: represents for missing at random. Missingness depends on observed quantities could be any other variables
 
-*MNAR*: represents for missing not at random. Missingness may depend on unobserved quantities itself. The probability of being missing varies for reasons that are unknown.
+    *MNAR*: represents for missing not at random. Missingness may depend on unobserved quantities itself. The probability of being missing varies for reasons that are unknown.
 
 2. Explain in a couple of sentences how the Multiple Imputation by Chained Equations (MICE) work.
 
+    **Solution**:
+    
+    First, a simple imputation such as imputing the mean is performed for every missing value in the dataset. These mean imputations can be thought of as "place holders". Next, The "place holder" mean imputations for one variable (noted as X below) are set back to missing.The observed values from X in last step are regressed on the other variables in the imputation model under the same assumptions that one would make when performing linear, logistic or posion regression models outside of the context of imputing missing data. The missing values for X are then replaced with predictions (imputations) from the regression model. When "var" is subsequently used as an independent variable in the regression models for other variables, both the observed and these imputed values will be used. Repeat the steps for each variable that has missing data. The cycling through each of the variables consititutes one iteration. At the end of one cycle all of the missing values have been replaced with predictions from regressions that reflect the relationships observed in the data.Repeat the cycles with the imputations being updated at each cycle. 
+
 3. Perform a data quality check of the ICU stays data. Discard variables with substantial missingness, say >5000 `NA`s. Replace apparent data entry errors by `NA`s.
+
+
 
 4. Impute missing values by `miceRanger` (request $m=3$ datasets). This step is very computational intensive. Make sure to save the imputation results as a file.
 
