@@ -8,8 +8,11 @@ output:
     toc_depth: 4
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+
+# default cache is false, previous result are saved!
+
 ```
                       
 Display machine information:
@@ -18,9 +21,12 @@ sessionInfo()
 ```
 Load database libraries and the tidyverse frontend:
 ```{r}
-library(tidyverse)
-library(lubridate)
-library(miceRanger)
+if (!require("pacman")){
+  install.packages("pacman", repos='http://cran.us.r-project.org')
+}
+
+p_load("tidyverse", "magrittr", "plyr", 
+       "lubridate", "miceRanger")
 ```
 
 ## Q1. Missing data
@@ -53,9 +59,109 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
 
 3. Perform a data quality check of the ICU stays data. Discard variables with substantial missingness, say >5000 `NA`s. Replace apparent data entry errors by `NA`s.
 
+  **Use icu_cohort.rds**
 
+      **Solution**:
+    ```{r}
+    # Set the path
+    os <- sessionInfo()$running
+    if (str_detect(os, "Linux")) {
+      repo_path <- "/home/yingyanwu/biostat-203b-2021-winter"
+      } else if (str_detect(os, "Windows")) {
+      repo_path <- paste0("C:/Users/Yingyan Wu/OneDrive - UCLA IT Services", 
+                          "/2021 Winter/BIOS 203B/biostat-203b-2021-winter")
+      }
+    ```
+    
+    ```{r}
+    #---- Load the data ----
+    icustays <- readRDS(paste0(repo_path, "/hw3/mimiciv_shiny", "/icu_cohort.rds")) %>%
+  print(width = Inf)
+    
+    #---- Missingness ----
+    missingness_df <- function(dataframe){
+      estimate <- function(x){
+        stats <- sum(is.na(x))
+        names(stats) <- "n_missing"
+        return(stats)
+      }
+      stats_tbl <- dataframe %>%
+        # select(-contains("id")) %>%
+        purrr::map_dfr(estimate) %>%
+        mutate("variable" = colnames(dataframe)) %>%
+        as_tibble() %>%
+        select(variable, everything())
+      return(stats_tbl)
+    }
+      
+    var_discard <- 
+      missingness_df(icustays) %>%
+      filter(n_missing > 5000) %>%
+      print(width = Inf)
+
+    icustays_clean <- icustays %>%
+      select(!var_discard$variable) %>%
+      print(width = Inf)
+    
+    #---- Apparent data entry errors ----
+    estimate_df <- function(dataframe){
+      estimate <- function(x){
+        stats <- 
+          c(length(x), 
+            mean(x,na.rm = T), 
+            median(x,na.rm = T),
+            sd(x,na.rm = T),
+            min(x,na.rm = T),
+            max(x,na.rm = T),
+            (max(x,na.rm = T) -  mean(x,na.rm = T) > 3 * sd(x,na.rm = T)),
+            # sum(x,na.rm = T), sum(is.na(x)),
+            quantile(x,c(0.025, 0.975),na.rm = T)
+          )
+        names(stats) <- c("N", "Mean", "Median",
+                          "Sd", "Min", "Max",
+                          "Outliers",
+                          # "Sum", "Missing"
+                          "p2.5th", "p97.5th"
+        )
+        return(round(stats, 4))
+      }
+      
+      stats_tib <- dataframe %>%
+        select(where(is.numeric)) %>%
+        purrr::map_dfr(estimate) %>%
+        as_tibble() %>%
+        mutate("variable" = colnames(dataframe)) %>%
+        select(variable, everything())
+      
+      return(stats_tib)
+    }
+    
+# based on the app created previously, and also the results for checking below
+    labvar <- c("bicarbonate", "calcium", "chloride", "creatinine", "glucose", 
+            "magnesium", "potassium", "sodium", "hematocrit", "wbc")
+    vitalvar <- c("heart_rate", 
+              "non_invasive_blood_pressure_systolic",
+              "non_invasive_blood_pressure_mean",
+              "respiratory_rate",
+              "temperature_fahrenheit")
+    
+    icustays_clean %>%
+      select(labvar, vitalvar) %>%
+      estimate_df() %>%
+      print(width = Inf)
+    
+    icustays_clean %>%
+      mutate(
+        
+      )
+    
+    
+    ```
+    
 
 4. Impute missing values by `miceRanger` (request $m=3$ datasets). This step is very computational intensive. Make sure to save the imputation results as a file.
+
+  **When use miceRanger, `max.depth=10`**
 
 5. Make imputation diagnostic plots and explain what they mean.
 
