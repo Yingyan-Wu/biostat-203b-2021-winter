@@ -59,9 +59,8 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
 
 3. Perform a data quality check of the ICU stays data. Discard variables with substantial missingness, say >5000 `NA`s. Replace apparent data entry errors by `NA`s.
 
-  **Use icu_cohort.rds**
-
       **Solution**:
+      For the outliers, use $mean\ \pm\ 3sd$ as a threshold.
     ```{r}
     # Set the path
     os <- sessionInfo()$running
@@ -72,6 +71,7 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
                           "/2021 Winter/BIOS 203B/biostat-203b-2021-winter")
       }
     ```
+    
     
     ```{r}
     #---- Load the data ----
@@ -169,9 +169,108 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
 
 4. Impute missing values by `miceRanger` (request $m=3$ datasets). This step is very computational intensive. Make sure to save the imputation results as a file.
 
-  **When use miceRanger, `max.depth=10`**
+    **Solutions**:
+
+    ```{r, eval = FALSE}
+    # ---- multiple imputation with 3 datasets and 10 iteration ----
+    # Don't need to do the multiple imputation in parallel
+    # library(doParallel)
+    # cl <- makeCluster(10)
+    # registerDoParallel(cl)
+    
+    system.time(icustays_mice <- miceRanger(
+      icustays_clean, m = 3, maxiter = 10, 
+      # parallel = FALSE, 
+      returnModels = FALSE, 
+      verbose = TRUE, 
+      max.depth = 10 #set max.depth=10 to reduce the runtime
+                    # Details see https://github.com/FarrellDay/miceRanger/issues/6
+    ))
+    # stopCluster(cl)
+    # registerDoSEQ()
+    
+    ```
 
 5. Make imputation diagnostic plots and explain what they mean.
+
+    **Solution**:
+
+    ```{r, eval = FALSE}
+    #---- Diagnositic plots ----
+    # plotVarConvergence(icustays_mice, vars = "allNumeric")
+    # plotDistributions(icustays_mice, vars = "allNumeric")
+    
+    # For a clearer view of the diagnostic plots
+    # imputed numeric variables vectors
+    var_1_4 <- c("bicarbonate", "calcium", "chloride", "creatinine")
+    var_5_8 <- c("glucose", "magnesium", "potassium", "sodium")
+    var_9_12 <- c("hematocrit", "wbc", "heart_rate", 
+                  "non_invasive_blood_pressure_systolic")
+    var_13_15 <- c("non_invasive_blood_pressure_mean",
+                  "respiratory_rate",
+                  "temperature_fahrenheit")
+    
+    var_list <- list(var_1_4, var_5_8, var_9_12, var_13_15)
+    
+    # Didn't work
+    # for (i in 1:4){
+    #   jpegpath <- paste0(repo_path, "/hw4", "/Imputation_diagnostic_figures", 
+    #                     "/Distribution_",i, ".jpeg" )
+    # jpeg(file = jpegpath)
+    #   plotDistributions(icustays_mice, vars = varlist[[i]])
+    #   dev.off()
+    # }
+    
+    # Distribution plots
+    jpeg("Distribution_1.jpeg")
+    plotDistributions(icustays_mice, vars = var_1_4)
+    dev.off()
+    
+    jpeg("Distribution_2.jpeg")
+    plotDistributions(icustays_mice, vars = var_5_8)
+    dev.off()
+    
+    jpeg("Distribution_3.jpeg")
+    plotDistributions(icustays_mice, vars = var_9_12)
+    dev.off()
+    
+    jpeg("Distribution_4.jpeg")
+    plotDistributions(icustays_mice, vars = var_13_15)
+    dev.off()
+    
+    # Convergence plots
+    jpeg("Converge_1.jpeg")
+    plotVarConvergence(icustays_mice, vars = var_1_4)
+    dev.off()
+    
+    jpeg("Converge_2.jpeg")
+    plotVarConvergence(icustays_mice, vars = var_5_8)
+    dev.off()
+    
+    jpeg("Converge_3.jpeg")
+    plotVarConvergence(icustays_mice, vars = var_9_12)
+    dev.off()
+    
+    jpeg("Converge_4.jpeg")
+    plotVarConvergence(icustays_mice, vars = var_13_15)
+    dev.off()
+    
+    sum(is.na(icustays_clean$hospital_expire_flag))
+    ```
+    
+    ![Distribution of Mice Object](Distribution_1.jpeg)
+    ![Distribution of Mice Object](Distribution_2.jpeg)
+    ![Distribution of Mice Object](Distribution_3.jpeg)
+    ![Distribution of Mice Object](Distribution_4.jpeg)
+    
+    From the distribution of imputed values figure, most of the distribution of the imputed data (in black line) matches the original nonmissing distribution shown in red line indicating the missingness mechanism for the data is Missing completely at Random.
+    
+    ![Convergence of Mice Object](Converge_1.jpeg)
+    ![Convergence of Mice Object](Converge_2.jpeg)
+    ![Convergence of Mice Object](Converge_3.jpeg)
+    ![Convergence of Mice Object](Converge_4.jpeg)
+    
+    From the convergence plots, most of the variables converged over the iterations but more iterations are actually needed based on the plots of bicarbonate, chloride, creatinine, non_invasive_blood_pressure since we are not supposed to see an increasing or an decreasing pattern here. 
 
 6. Obtain a complete data set by averaging the 3 imputed data sets.
 
