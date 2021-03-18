@@ -147,9 +147,9 @@ icustays_tble %>%
   # vi. collect SQL query result into memory as a tibble
   as_tibble() %>%
   # vii. create an indicator for 30-day mortality
-  mutate("flag_die30" = 
-           case_when((deathtime - admittime > 30) ~ 0,
-                      (deathtime - admittime <= 30) ~ 1)) %>%
+  mutate("flag_die30" = case_when(is.na(day(deathtime) - day(admittime)) ~ 0,
+                      (day(deathtime) - day(admittime) > 30) ~ 0,
+                     (day(deathtime) - day(admittime) <= 30) ~ 1)) %>%
   # viii. save the final tibble to an `icu_cohort.rds` R data file
   # in the shiny folder
   saveRDS("./mimiciv_shiny/icu_cohort.rds")
