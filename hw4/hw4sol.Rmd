@@ -26,7 +26,7 @@ if (!require("pacman")){
 }
 
 p_load("tidyverse", "magrittr", "plyr", "purrr",
-       "lubridate", "miceRanger")
+       "lubridate", "miceRanger", "knitr")
 ```
 
 ## Q1. Missing data
@@ -359,13 +359,82 @@ Develop at least two analytic approaches for predicting the 30-day mortality of 
     
     ```{r}
     #---- Method 1: logistic regression ----
+    trainsubset <- train %>%
+      select("gender", "age_at_admission", "marital_status", "ethnicity", all_of(labvar), all_of(vitalvar), "flag_die30") %>%
+      mutate("marital_status" = as.factor(marital_status),
+             "ethnicity" = as.factor(ethnicity),
+             "female" = ifelse(gender == "F", 1, 0)) %>%
+      select(-"gender") %>%
+      select("female", everything())
     
-    model1 <- glm(as.factor(flag_die30 ~ gender + age_at_admission + ))
+    model1 <- glm(as.factor(flag_die30) ~ ., data = trainsubset, family = binomial (link = "logit"))
+    
+    kable(model1$coefficients, digits=3)
+    
+    # ---- Method 2: Lasso ----
     pacman::p_load("glmnet")
+  
+    # model2 <- glmnet(y = trainsubset$flag_die30, x = model.matrix(trainsubset[, 1:19], d), dat = trainsubset, alpha = 1)
     
+    predictors <- c("female", "age_at_admission", "marital_status", "ethnicity", labvar, vitalvar)
+    x <- model.matrix(as.formula(paste0("~ ", paste0(predictors, collapse = "+"), "- 1")), trainsubset)
     
+        cv_lasso <- cv.glmnet(x = x, y = trainsubset$flag_die30, alpha = 1)
+        par(mfrow = c(1,2))
+        plot(cv_lasso)
+        plot(model2, xvar = c("lambda"))
+        abline(v = log(cv_lasso$lambda.min), lty = 2)
+        
+        lambdalasso <- coef(cv_lasso, s = "lambda.min")
+        selasso <- coef(cv_lasso, s = "lambda.1se")
+        res_lasso <- as.matrix(cbind(lambdalasso, selasso))
+        colnames(res_lasso) <- c('Min Lambda', '1 SE rule')
+        kable(res_lasso, digits = 2)
+        
+                model2 <- glmnet(y = trainsubset$flag_die30, x = x, dat = trainsubset, alpha = 1, lambda = cv_lasso$lambda.min)
+                
+                kable(coef(model2), digits = 2)
+
     ```
     
+    As shown in the lasso figure, best $log(\lambda)$ value is around -9  when the MSE is smallest. 
 
 
 3. Compare model prediction performance on the test set.
+
+```{r, eval = FALSE}
+library(ROCR)
+```
+
+```{r}
+testsubset <- test %>%
+      select("gender", "age_at_admission", "marital_status", "ethnicity", all_of(labvar), all_of(vitalvar), "flag_die30") %>%
+      mutate("marital_status" = as.factor(marital_status),
+             "ethnicity" = as.factor(ethnicity),
+             "female" = ifelse(gender == "F", 1, 0)) %>%
+      select(-"gender") %>%
+      select("female", everything())
+
+#---- Predicted outcome logistic regression ----
+pred_logistic_outcomes <- tibble(probs = predict(model2, newx = x_pred, type = "response")) %>%
+  mutate(y_pred = ifelse(probs > 0.5, 1, 0))
+
+#---- Predicted outcome lasso ----
+x_pred_lasso <- model.matrix(as.formula(paste0("~ ", paste0(predictors, collapse = "+"), "- 1")), testsubset)[, -1]
+
+y_pred <- as.numeric(predict(model2), newx = x_pred_lasso)
+
+library(ROCR)
+test_model <- 
+pred1 <- prediction(fitted(model1),train$flag_die30)
+pred2 <- prediction(fitted(fit2), test$flag_die30)
+perf1 <- performance(pred1, 'tpr','fpr')
+perf2 <- performance(pred2, 'tpr', 'fpr')
+plot(perf1, col=4)
+plot(perf2, add=T, col=2)
+abline(a=0,b=1,lty=2)
+text(0.3,0.4,'Logistic',col=4)
+text(0.1,0.8,'GAM',col=2)
+```
+
+
