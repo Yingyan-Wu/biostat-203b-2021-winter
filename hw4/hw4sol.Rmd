@@ -61,8 +61,7 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
 
       **Solution**:
       For the outliers, use $mean\ \pm\ 3sd$ as a threshold.
-    ```{r}
-    # TBC
+    ```{r, echo = FALSE}
     # Set the path
     # os <- sessionInfo()$running
     # if (str_detect(os, "Linux")) {
