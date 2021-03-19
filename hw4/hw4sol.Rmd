@@ -209,10 +209,11 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
     var_13_15 <- c("non_invasive_blood_pressure_mean",
                   "respiratory_rate",
                   "temperature_fahrenheit")
-    
-    var_list <- list(var_1_4, var_5_8, var_9_12, var_13_15)
+    var_num <- c(var_1_4, var_5_8, var_9_12, var_13_15)
+    var_char <- c("discharge_location", "marital_status")
     
     # Didn't work
+    # var_list <- list(var_1_4, var_5_8, var_9_12, var_13_15)
     # for (i in 1:4){
     #   jpegpath <- paste0(repo_path, "/hw4", "/Imputation_diagnostic_figures", 
     #                     "/Distribution_",i, ".jpeg" )
@@ -238,6 +239,10 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
     plotDistributions(icustays_mice, vars = var_13_15)
     dev.off()
     
+    jpeg("Distribution_5.jpeg")
+    plotDistributions(icustays_mice, vars = var_char)
+    dev.off()
+    
     # Convergence plots
     jpeg("Converge_1.jpeg")
     plotVarConvergence(icustays_mice, vars = var_1_4)
@@ -255,24 +260,69 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
     plotVarConvergence(icustays_mice, vars = var_13_15)
     dev.off()
     
-    sum(is.na(icustays_clean$hospital_expire_flag))
+    jpeg("Converge_5.jpeg")
+    plotVarConvergence(icustays_mice, vars = var_char)
+    dev.off()
+
     ```
     
     ![Distribution of Mice Object](Distribution_1.jpeg)
     ![Distribution of Mice Object](Distribution_2.jpeg)
     ![Distribution of Mice Object](Distribution_3.jpeg)
     ![Distribution of Mice Object](Distribution_4.jpeg)
+    ![Distribution of Mice Object](Distribution_5.jpeg)
     
-    From the distribution of imputed values figure, most of the distribution of the imputed data (in black line) matches the original nonmissing distribution shown in red line indicating the missingness mechanism for the data is Missing completely at Random.
+    From the distribution of imputed values figure for numeric imputed variables, most of the distribution of the imputed data (in black line) matches the original nonmissing distribution shown in red line indicating the missingness mechanism for the data is Missing completely at Random. For the imputed chateristic variables distribution figure, the black dot and grey bar matches.
     
     ![Convergence of Mice Object](Converge_1.jpeg)
     ![Convergence of Mice Object](Converge_2.jpeg)
     ![Convergence of Mice Object](Converge_3.jpeg)
     ![Convergence of Mice Object](Converge_4.jpeg)
+    ![Convergence of Mice Object](Converge_5.jpeg)
     
     From the convergence plots, most of the variables converged over the iterations but more iterations are actually needed based on the plots of bicarbonate, chloride, creatinine, non_invasive_blood_pressure since we are not supposed to see an increasing or an decreasing pattern here. 
 
 6. Obtain a complete data set by averaging the 3 imputed data sets.
+
+    **Solution:**
+    ```{r, eval = F}
+    # Get the dataset
+    icustays_mice_datlist <- completeData(icustays_mice, datasets = 1:icustays_mice$callParams$m, verbose = TRUE)
+    
+    dat1 <- as.data.frame(icustays_mice_datlist[1])
+    colnames(dat1) <- colnames(icustays_clean)
+    dat2 <- as.data.frame(icustays_mice_datlist[2])
+    colnames(dat2) <- colnames(icustays_clean)
+    dat3 <- as.data.frame(icustays_mice_datlist[3])
+    colnames(dat3) <- colnames(icustays_clean)
+    
+    # Average the numeric imputed variables
+    icustays_mice_avedat <- icustays_clean
+    
+    for (var in var_num){
+      subset1 <- dat1 %>% select(all_of(var))
+      subset2 <- dat2 %>% select(all_of(var))
+      subset3 <- dat3 %>% select(all_of(var))
+      subset <- cbind(subset1, subset2, subset3)
+      icustays_mice_avedat[, var] <- round(rowMeans(subset),2)
+    }
+   
+    # Average the categorical imputed variables
+    for (var in var_char){
+      subset1 <- dat1 %>% select(all_of(var))
+      subset2 <- dat2 %>% select(all_of(var))
+      subset3 <- dat3 %>% select(all_of(var))
+      subset<- as.data.frame(data.matrix(cbind(subset1, subset2, subset3)))
+      icustays_mice_avedat[, var] <- round(rowMeans(subset_temp))
+    }
+    # Marital_status: Divorced, Married, Single, Widowed
+    
+    # Save the averaged dataset
+    icustays_mice_avedat %>% saveRDS("./icustays_imp.rds")
+    
+    ```
+  
+
 
 ## Q2. Predicting 30-day mortality
 
@@ -280,6 +330,42 @@ Develop at least two analytic approaches for predicting the 30-day mortality of 
 
 1. Partition data into 80% training set and 20% test set. Stratify partitioning according the 30-day mortality status.
 
+    **Solutions:**
+
+    ```{r}
+    #---- Load the dataset ----
+    icustays_imp <- readRDS("icustays_imp.rds")
+    # Stratified based on 30-day mortality status
+    icustays_imp_die30 <- icustays_imp %>% filter(flag_die30 == 1)
+    icustays_imp_nodie <- icustays_imp %>% filter(flag_die30 == 0)
+    # die30 == 1
+    train_locs_die <- sample(1:nrow(icustays_imp_die30), size  = 0.8*nrow(icustays_imp_die30))
+    train_die30 <- icustays_imp_die30[train_locs_die, ]
+    test_die30 <- icustays_imp_die30[-train_locs_die, ]
+    # die30 == 0
+    train_locs_nodie <- sample(1:nrow(icustays_imp_nodie), size  = 0.8*nrow(icustays_imp_nodie))
+    train_nodie30 <- icustays_imp_nodie[train_locs_nodie, ]
+    test_nodie30 <- icustays_imp_nodie[-train_locs_nodie, ]
+    
+    # Bind the training dataset and test dataset
+    train <- rbind(train_die30, train_nodie30)
+    test <- rbind(test_die30, test_nodie30)
+    ```
+
+
 2. Train the models using the training set.
+    
+    **Solutions:**
+    
+    ```{r}
+    #---- Method 1: logistic regression ----
+    
+    model1 <- glm(as.factor(flag_die30 ~ gender + age_at_admission + ))
+    pacman::p_load("glmnet")
+    
+    
+    ```
+    
+
 
 3. Compare model prediction performance on the test set.
