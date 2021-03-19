@@ -383,19 +383,18 @@ Develop at least two analytic approaches for predicting the 30-day mortality of 
     # ---- Method 2: Lasso ----
     pacman::p_load("glmnet")
     
-    # model2 <- glmnet(y = trainsubset$flag_die30, 
-    # x = model.matrix(trainsubset[, 1:19], d), dat = trainsubset, alpha = 1)
-    
     predictors <- c("female", "age_at_admission", "marital_status", "ethnicity", 
                     labvar, vitalvar)
     x <- model.matrix(
       as.formula(paste0("~ ", paste0(predictors, collapse = "+"), "- 1")), 
       trainsubset)
     
+    model_pre <- glmnet(y = trainsubset$flag_die30,
+    x =x, dat = trainsubset, alpha = 1)
     cv_lasso <- cv.glmnet(x = x, y = trainsubset$flag_die30, alpha = 1)
     par(mfrow = c(1,2))
     plot(cv_lasso)
-    plot(model2, xvar = c("lambda"))
+    plot(model_pre, xvar = c("lambda"))
     abline(v = log(cv_lasso$lambda.min), lty = 2)
     
     lambdalasso <- coef(cv_lasso, s = "lambda.min")
@@ -409,7 +408,7 @@ Develop at least two analytic approaches for predicting the 30-day mortality of 
                      lambda = cv_lasso$lambda.min # lasso penalty
                      )
     
-    kable(coef(model2), digits = 2)
+    coef(model2)
 
     ```
     
