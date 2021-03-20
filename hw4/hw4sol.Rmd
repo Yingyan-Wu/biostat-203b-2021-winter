@@ -23,7 +23,7 @@ if (!require("pacman")){
   install.packages("pacman", repos='http://cran.us.r-project.org')
 }
 p_load("tidyverse", "magrittr", "plyr", "purrr",
-       "lubridate", "miceRanger", "knitr")
+       "lubridate", "miceRanger", "knitr", "ROCR")
 ```
 
 ## Q1. Missing data
@@ -449,13 +449,13 @@ Develop at least two analytic approaches for predicting the 30-day mortality of 
     library(ROCR)
     pred1 <- prediction(pred_logistic$p, testsubset$flag_die30)
     pred2 <- prediction(pred_lasso$p, testsubset$flag_die30)
-    perf1 <- performance(pred1, 'tpr','fpr')
+    perf1 <- performance(pred1, 'tpr', 'fpr')
     perf2 <- performance(pred2, 'tpr', 'fpr')
     plot(perf1, col = 4)
     plot(perf2, add = T, col = 2)
-    abline(a = 0,b = 1,lty = 2)
-    text(0.2, 0.8,'Logistic',col = 4)
-    text(0.4, 0.4,'Logistic with Lasso panelty',col = 2)
+    abline(a = 0, b = 1, lty = 2)
+    text(0.2, 0.8,'Logistic', col = 4)
+    text(0.4, 0.4,'Logistic with Lasso panelty', col = 2)
     ```
     
     Based on the ROC curve, the model prediction performance on the test set is similar.
