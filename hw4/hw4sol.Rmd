@@ -10,9 +10,7 @@ output:
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
-
 # default cache is false, previous result are saved!
-
 ```
                       
 Display machine information:
@@ -24,7 +22,6 @@ Load database libraries and the tidyverse frontend:
 if (!require("pacman")){
   install.packages("pacman", repos='http://cran.us.r-project.org')
 }
-
 p_load("tidyverse", "magrittr", "plyr", "purrr",
        "lubridate", "miceRanger", "knitr")
 ```
@@ -60,7 +57,9 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
 3. Perform a data quality check of the ICU stays data. Discard variables with substantial missingness, say >5000 `NA`s. Replace apparent data entry errors by `NA`s.
 
       **Solution**:
+      
       For the outliers, use $mean\ \pm\ 3sd$ as a threshold.
+      
     ```{r, echo = FALSE}
     # Set the path
     # os <- sessionInfo()$running
@@ -265,7 +264,6 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
     jpeg("Converge_5.jpeg")
     plotVarConvergence(icustays_mice, vars = var_char)
     dev.off()
-
     ```
     
     ![Distribution of Mice Object](Distribution_1.jpeg)
@@ -287,6 +285,7 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
 6. Obtain a complete data set by averaging the 3 imputed data sets.
 
     **Solution:**
+    
     ```{r, eval = F}
     # Get the dataset
     icustays_mice_datlist <- 
@@ -325,8 +324,6 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
     icustays_mice_avedat %>% saveRDS("./icustays_imp.rds")
     
     ```
-  
-
 
 ## Q2. Predicting 30-day mortality
 
@@ -384,13 +381,15 @@ Develop at least two analytic approaches for predicting the 30-day mortality of 
     
     predictors <- c("female", "age_at_admission", "marital_status", "ethnicity", 
                     labvar, vitalvar)
-    x <- model.matrix(
-      as.formula(paste0("~ ", paste0(predictors, collapse = "+"), "- 1")), 
-      trainsubset)
-    
+    # x <- model.matrix(
+    #   as.formula(paste0("~ ", paste0(predictors, collapse = "+"), "- 1")), 
+    #   trainsubset)
+    x <- model.matrix(flag_die30 ~ ., trainsubset)[, -1]
     model_pre <- glmnet(y = trainsubset$flag_die30,
-    x =x, dat = trainsubset, alpha = 1)
+    x = x, dat = trainsubset, alpha = 1)
+    
     cv_lasso <- cv.glmnet(x = x, y = trainsubset$flag_die30, alpha = 1)
+    
     par(mfrow = c(1,2))
     plot(cv_lasso)
     plot(model_pre, xvar = c("lambda"))
@@ -408,21 +407,15 @@ Develop at least two analytic approaches for predicting the 30-day mortality of 
                      )
     
     coef(model2)
-
     ```
     
     As shown in the lasso figure, best $log(\lambda)$ value is around -9  when the MSE is smallest. 
-
 
 3. Compare model prediction performance on the test set.
 
     **Solutions**:
 
-    ```{r, eval = FALSE}
-    library(ROCR)
-    ```
-
-    ```{r, eval = FALSE}
+    ```{r}
     testsubset <- test %>%
       select("gender", "age_at_admission", "marital_status", "ethnicity", 
              all_of(labvar), all_of(vitalvar), "flag_die30") %>%
@@ -433,29 +426,37 @@ Develop at least two analytic approaches for predicting the 30-day mortality of 
       select("female", everything())
     
     #---- Predicted outcome logistic regression ----
-    pred_logistic_outcomes <- tibble(
-      probs = predict(model2, newx = x_pred, type = "response")
-    ) %>%
-      mutate(y_pred = ifelse(probs > 0.5, 1, 0))
     
+    pred_logistic <- tibble(
+      p = predict(model1, newdata = testsubset, type = "response")) %>%
+  mutate(y_pred = rbinom(nrow(testsubset), size = 1, prob = p))
+    
+    # table(pred_logistic$y_pred)
+    # table(testsubset$flag_die30)
+
     #---- Predicted outcome lasso ----
-    x_pred_lasso <- model.matrix(
-      as.formula(paste0("~ ", paste0(predictors, collapse = "+"), "- 1")), 
+    x_pred_lasso <- model.matrix(flag_die30 ~ ., 
       testsubset)[, -1]
     
-    y_pred <- as.numeric(predict(model2), newx = x_pred_lasso)
+    pred_lasso <- tibble(
+      p = predict(model2, newx = x_pred_lasso)) %>%
+      mutate(y_pred = rbinom(nrow(testsubset), size = 1, prob = abs(p)))
+   
+    # table(pred_lasso$y_pred)
+    # table(testsubset$flag_die30)
     
+    #---- ROC curve ----
     library(ROCR)
-    test_model <- 
-      pred1 <- prediction(fitted(model1),train$flag_die30)
-    pred2 <- prediction(fitted(fit2), test$flag_die30)
+    pred1 <- prediction(pred_logistic$p, testsubset$flag_die30)
+    pred2 <- prediction(pred_lasso$p, testsubset$flag_die30)
     perf1 <- performance(pred1, 'tpr','fpr')
     perf2 <- performance(pred2, 'tpr', 'fpr')
-    plot(perf1, col=4)
-    plot(perf2, add=T, col=2)
-    abline(a=0,b=1,lty=2)
-    text(0.3,0.4,'Logistic',col=4)
-    text(0.1,0.8,'GAM',col=2)
+    plot(perf1, col = 4)
+    plot(perf2, add = T, col = 2)
+    abline(a = 0,b = 1,lty = 2)
+    text(0.2, 0.8,'Logistic',col = 4)
+    text(0.4, 0.4,'Logistic with Lasso panelty',col = 2)
     ```
-
-
+    
+    Based on the ROC curve, the model prediction performance on the test set is similar.
+    
